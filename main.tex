@@ -1,19 +1,18 @@
 \documentclass{vldb}
-\usepackage{times}
+%\usepackage{times}
 
 % do not change these values
-\baselineskip 12pt
-\textheight 10in
-\textwidth 6.9in
-\oddsidemargin -0.3in
-\topmargin -0.3in
-\headheight 0in
-\headsep 0in
+%\baselineskip 12pt
+%\textheight 10in
+%\textwidth 6.9in
+%\oddsidemargin -0.3in
+%\topmargin -0.3in
+%\headheight 0in
+%\headsep 0in
 
 %\usepackage[utf8]{inputenc}
-\usepackage[english]{babel}
+%\usepackage[english]{babel}
 
-\usepackage{amsthm}
 \usepackage{amsfonts}
 \usepackage{graphicx}
 \usepackage{balance}  % for  \balance command ON LAST PAGE  (only there!)
@@ -34,15 +33,19 @@
 \newcommand{\argmin}{\text{arg}\,\text{min}}
 \newcommand{\argmax}{\text{arg}\,\text{max}}
 
-\theoremstyle{definition}
+%\theoremstyle{definition}
 \newtheorem{definition}{Definition}
+\newtheorem{prop}{Proposition}
+\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Theorem}
 
 
 \title{Rebuilding Locality-Sensitive Hashing Indices by Exploring Density of Hash Values}
-\author{John Doe$^1$ and Jane Monroe$^2$ \\
-\small {\em  $^1$Dept. Cloud, Cloud University \quad
-          $^2$Cloud National Labs} \\ [2mm]
-\small Submission Type: Research
+\author{
+\alignauthor
+Yanfeng Zhang, Xun Wei, Ge Yu\\
+      \affaddr{Northeast University, China}\\
+       \email{\{zhangyf, yuge\}@mail.neu.edu.cn}
 }
 \date{}
 \maketitle
@@ -63,7 +66,7 @@ Locality-sensitive hashing (LSH) is known as one of the most promising indexing 
 \input{conclusion}
 
 
-\bibliographystyle{ACM-Reference-Format}
+\bibliographystyle{abbrv}
 \bibliography{./references}
 
 \input{Appendix}
