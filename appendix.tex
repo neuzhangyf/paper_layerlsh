@@ -1,0 +1,73 @@
+\appendix
+
+\section{The Proof of Lemma 1}
+
+\begin{proof}
+
+Let us consider a number line, where each point is a real number.
+$y_i=a\cdot p_i+b$ is a point on the number line. By floor dividing
+$w$, the number line is divided into a sequence of $w$-width slots.
+According to the LSH function, all the points in the same $w$-width
+slot share the the same hash key.  The points that are close to $p_i$
+are all hashed to the points close to $y_i$ on the number line.  The
+position of $y_i$ is important.  If $y_i$ is close to the center of
+the slot, it is more likely that all $R$-length neighbors of $p_i$
+are in the same slot.
+
+According to the definition of $p$-stable distribution
+\cite{Datar:2004:LHS:997817.997857}, given a $d$-dimensional random
+vector $a$ each entry of which is chosen independently from a standard
+gaussian distribution $\mathcal{N}(0,1)$, for two points $p_i$ and
+$p_j$, the distance between their projections $|a\cdot p_i-a\cdot
+p_j|$ is distributed as $||p_i, p_j||\cdot x$, where $x$ is the \textbf{absolute
+value} of a standard gaussian random variable. Therefore, for any
+$p_j$ where $||p_i, p_j||<R$, we have $\max_{j}|y_i-y_j|=\max_{j}|a\cdot
+p_i-a\cdot p_j|<Rx$.
+%
+% Furthermore, since $b$ is drawn uniformly from $[0,w)$,
+
+Moreover, $y_i=a\cdot p_i+b$ is uniformly distributed in a certain
+slot. To ensure that $y_i$ and all its $R$-length neighbors are in
+the same slot, $y_i$ has to be located in the interval of $[\alpha
+w+Rx,(\alpha+1)w-Rx)$ for some $\alpha$.   The probability that $y_i$ resides in such an
+interval is $\frac{w-2Rx}{w}=1-\frac{2Rx}{w}$.
+%
+The probability density function of the absolute value of the standard
+gaussian distribution is $f_p(x)=\frac{2e^{-x^2/2}}{\sqrt{2\pi}}$,
+where $x \geq 0$.  Therefore, the probability becomes
+$1-\frac{2Rx}{w}=\int_{0}^{\infty}(1-\frac{2Rx}{w})f_p(x)dx$, and
+a further calculation shows that the probability is
+$1-\frac{4R}{\sqrt{2\pi}w}$.\qed
+
+\end{proof}
+
+
+\section{The Proof of Theorem 1}
+
+\begin{proof}
+After applying $l$ groups of $m$ hash functions, we will obtain $l$ $\hat\rho_i^g$ values $(1\leq g\leq l)$. According to the definition of $\rho_i$, we have
+$\hat\rho_i^g \leq \max_{g}\hat\rho_i^g \leq \hat\rho_i$. If
+$\max_{g}\hat\rho_i^g \neq \rho_i$, then
+$\hat\rho_i^g\neq \rho_i$ for all $1\leq g\leq l$.
+
+From Lemma 1, under a single hash function the probability that $p_i$ and all its $R$-length neighbors are hashed to the same bucket is at least $1-\frac{4R}{\sqrt{2\pi}w}$. With a group of $m$ LSH functions $G=(h_1,h_2,\ldots,h_{m})$ applied on each point, only points sharing all the $m$ hash values are placed in the same partition. Suppose $\hat\rho_i^g$ is the approximated density value for a specific hash function group $G_g(p_i)$. Due to the fact that each LSH function is independently and randomly selected, we have:
+\begin{equation}\label{eq:probx}
+\begin{aligned}
+  \text{Pr}[\hat\rho_i^g=\rho_i]=&\text{Pr}\big[G_g(p_i)=G_g(p_{j})|\forall j, ||p_i,p_j||\leq R\big]\\
+  =&\prod_{t=1}^{m}\text{Pr}\big[h_t(p_i)=h_t(p_j)|\forall j, ||p_i,p_j||\leq R\big]\\
+  \geq &\Big(1-\frac{4R}{\sqrt{2\pi}w}\Big)^m\notag
+\end{aligned}
+\end{equation}
+
+
+%
+Further, since the $l$ groups of hash functions
+$G_g(1\leq g\leq l)$ is independently and randomly generated,
+we have the following:
+\begin{equation}\label{eq:prob3}
+\begin{aligned}
+  \text{Pr}[\hat\rho_i=\rho_i]=&1-\prod_{g=1}^l\Big(1-\text{Pr}\Big[\hat\rho_i^g=\rho_i\Big]\Big)\\
+  \geq &1-\Big[1-\Big(1-\frac{4R}{\sqrt{2\pi}w}\Big)^m\Big]^l\notag \qed
+\end{aligned}
+\end{equation}
+\end{proof}

@@ -1,0 +1,7 @@
+awk '{print $1+1,$2,$4}' kdd_log.txt | sort -n > tmp
+paste kdd_density.txt tmp > tmp2
+awk -F "[ \t]" '{i=int($2/10);a[i]+=$2;b[i]+=$4;d[i]+=$5;c[i]++}END{for(i in a) printf("%f\t%f\t%f\t%d\n",a[i]/c[i],b[i]/c[i],d[i]/c[i],c[i]);}' tmp2 | sort -n -k1 > density_ratio.txt
+
+awk '{print $1+1,$2,$4}' kdd_log_mp.txt | sort -n > tmp
+paste kdd_density.txt tmp > tmp2
+awk -F "[ \t]" '{i=int($2/10);a[i]+=$2;b[i]+=$4;d[i]+=$5;c[i]++}END{for(i in a) printf("%f\t%f\t%f\t%d\n",a[i]/c[i],b[i]/c[i],d[i]/c[i],c[i]);}' tmp2 | sort -n -k1 > density_ratio_mp.txt
