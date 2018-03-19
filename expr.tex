@@ -20,7 +20,7 @@ research/clustering/streamkmpp}. Properties of these three datasets are summariz
 \begin{table}[!htb]
 \vspace{-0.1in}
     \caption{Datasets}
-    \vspace{-0.15in}
+    %\vspace{-0.15in}
     \label{tab:data}
     \centering
     \small
@@ -176,9 +176,9 @@ Figure \ref{fig:dshresult} shows the query accuracy with various query cost for 
 The space consumption is the size of the index file which is used to store the index structure. The space consumption of the basic LSH index and the LayerLSH index are listed in Table \ref{tab:space_lsh}, where $l=3, m=3, \alpha=0.9$ for both LSH and LayerLSH. Since the dense buckets are rehashed in extra hash tables and more copies of dense buckets exist, LayerLSH needs more space to store the extra indices. In LSH, using fewer hash tables is supposed to take up less space, but this is not true for LayerLSH. This is because that more overloaded buckets and much denser buckets could exist when using a small number of LSH tables.
 
 \begin{table}[!htb]
-%\vspace{-0.05in}
+\vspace{-0.1in}
     \caption{Space consumption for LSH and LayerLSH}
-    \vspace{-0.05in}
+    %\vspace{-0.05in}
     \label{tab:space_lsh}
     \centering
     \small
@@ -209,9 +209,9 @@ In LayerLSH, the space consumption highly depends on the expected precision para
 Rebuilding LSH indices is not free. We need extra time cost for building LayerLSH index. We measure the rebuilding time for LayerLSH in this experiment. The amount of rebuilding effort is highly related to the parameter $\beta$, which indicates the threshold for overloaded bucket. A smaller $\beta$ implies that higher query cost is tolerable, so that it is possible that only a small number of highly overloaded buckets are rehashed. In contrast, a bigger $\beta$ implies that a large number of buckets are probably recognized as overloaded buckets and great efforts can be put on rehashing these overloaded buckets. Accordingly, the rebuilding time increases as $\beta$ is increased.
 
 \begin{table}[!htb]
-%\vspace{-0.1in}
+\vspace{-0.1in}
     \caption{Rebuilding time for LayerLSH}
-    \vspace{-0.05in}
+    %\vspace{-0.05in}
     \label{tab:rebuildtime}
     \centering
     \small
