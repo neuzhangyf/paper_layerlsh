@@ -247,10 +247,14 @@ LayerLSH integrates the idea of multi-probe LSH, which identifies the densities 
 %The original paper shows that most $k$ nearest neighbors are retrieved by only probing 1-step buckets and 2-step buckets.
 \end{comment}
 
+
+\subsection{Supporting Dynamic Data Stream}
+
+To deal with dynamic data, we need to make LayerLSH support point insertions and deletions. Algorithm \ref{alg:split} can be slightly changed for updating the index structure, where the input is the continuous insertions or deletions. A point is inserted into or deleted from a specified bucket followed by checking the bucket size. If the bucket size is bigger than $T_u$ after insertions, the bucket will be split. If the bucket size is smaller than $T_l$ after deletions, it will be marked as underloaded, and several similar underloaded buckets will be searched together when query processing.  
+
+However, the naive implementation may result in too many unnecessary bucket splits. For instance, an insertion followed by multiple deletions to a full bucket results in unnecessary bucket split. To alleviate this problem, we introduce the \textit{time window} concept and buffer these insertion/deletion operations. Basically, in a time window, if the bucket size is not larger than a \textit{maximum tolerance}, it will not be split, otherwise, it will still be split. The maximum tolerance of bucket size should be a little bit larger than $T_u$, which implies the effect of buffering. After each time window, all the buckets are evaluated to determine whether they should be split by considering the original upper bound size $T_u$. By introducing the time window based buffering, a large amount of unnecessary bucket splits can be avoided and the processing throughput can be increased, at the expanse that the query cost can be increased due to the delayed bucket split operations. The tradeoff between processing throughput and query cost can be adjusted by tuning the maximum tolerance parameter, the effect of which will be shown in Section \ref{sec:expr}.
+
 \subsection{Index Maintenance}
-
-
-To deal with dynamic data, it is straightforward to make LayerLSH support point insertions and deletions. Algorithm \ref{alg:split} can be slightly changed for updating the index structure, where the input is the continuous insertions or deletions. A point is inserted into or deleted from a specified bucket followed by checking the bucket size. If the bucket size is bigger than $T_u$ after insertions, the bucket will be split. If the bucket size is smaller than $T_l$ after deletions, it will be marked as underloaded, and several similar underloaded buckets will be searched together when query processing.  To avoid frequent index updates, we perform the index update after a number of insertions and deletions rather than after each single insertion or deletion. 
 
 In addition, LayerLSH can be implemented as a disk-based index for maintaining large data sets. Since the basic structure in LayerLSH is tree-like, it is straightforward to store the index using a tree structure. The internal nodes storing the child LSH parameters as well as the pointers to child buckets are maintained in an \emph{index file}, and the leaf nodes storing the data points are maintained in a \emph{data file}. Note that, one leaf node that stores a large bucket is written to multiple file blocks, and multiple leaf nodes storing multiple small buckets are written to a single file block to save space. Similar buckets are stored continuously in a file block to support ``nearby'' bucket search.
 
