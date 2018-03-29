@@ -254,6 +254,50 @@ To deal with dynamic data, we need to make LayerLSH support point insertions and
 
 However, the naive implementation may result in too many unnecessary bucket splits. For instance, an insertion followed by multiple deletions to a full bucket results in unnecessary bucket split. To alleviate this problem, we introduce the \textit{time window} concept and buffer these insertions/deletions within a time window range. Basically, in a time window, if the bucket size does not exceed a predefined \textit{maximum tolerance}, it will not be split, otherwise, it will still be split. The maximum tolerance of bucket size should be a little bit larger than the original upper bound size $T_u$, which implies the effect of buffering. After each time window, all the buckets are evaluated to determine whether they should be split by comparing their sizes with $T_u$. By introducing the time window based buffering, a large number of unnecessary bucket splits can be avoided so that the processing throughput is expected to be higher, at the expanse that the query cost can be increased due to the delayed bucket splits. The tradeoff between processing throughput and query cost can be adjusted by tuning the maximum tolerance parameter, the effect of which will be shown in Section \ref{sec:expr}.
 
+\begin{algorithm}[t]
+\SetNoFillComment
+\SetKwProg{Fn}{Function}{:}{end}
+\SetKwFunction{StreamInsert}{StreamInsert}
+\SetKwFunction{RecursSplit}{RecursSplit}
+\SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+
+\Input{new point $p$, LayerLSH tables $HT=\{HT_1,\ldots,HT_l\}$, maximum tolerance $\epsilon_m$, caching tolerance $\epsilon_c$, time window $W$}
+\Output{updated LayerLSH tables $HT$}
+\BlankLine
+\While{true}{
+    blockread($p$)\;
+    $t_c\leftarrow$ current time\;
+    \If{$t_c-t_l\geq W$}{
+        recursively split $HT$ according to $(1+\epsilon_c)\cdot T_u$\;
+        $t_l\leftarrow$ current time;
+    }
+    \StreamInsert($p$, $HT$)\;
+}
+\BlankLine
+\Fn{\StreamInsert($p$, $HT$)}{\
+    \ForEach{$HT_i$ in $HT$}{
+        $b\leftarrow$ locate bucket with hash key $\{h_1(p),\ldots,h_m(p)\}$\;
+        \If{$b$ is a pointer bucket}{
+            $HT_{child}\leftarrow$ locate the child hash tables $b$ points to\;
+            status$\leftarrow$\StreamInsert($p$, $HT_{child}$, $R'$, $P'$)\;
+            \If{status$==$overloaded}{
+                $HT_{child}\leftarrow$ resplit $HT_{child}$ according to the table size);
+            }
+        }
+        \ElseIf{$b$ is a data bucket}{
+            \If{$|b|>(1+\epsilon_m)\cdot T_u$}{
+                return $overloaded$;
+            }
+            return $success$;
+        }
+    }
+    return $success$;
+}
+\caption{Streamed Insertions in LayerLSH}
+\label{alg:lshquery}
+\end{algorithm}
+
+
 \begin{comment}
 \subsection{Index Maintenance}
 
