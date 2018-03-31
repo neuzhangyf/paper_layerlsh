@@ -1,4 +1,4 @@
-\section{Applicability to Other LSH Indices}
+\section{Extension to Other LSH Indices}
 \label{sec:extension}
 
 We discuss the possibilities of applying our approach to other LSH variants in this section.
@@ -37,11 +37,11 @@ The \textbf{LSB} approach constructs an LSB-tree structure and performs approxim
 
 \begin{figure}[t]
 \vspace{-0.1in}
-    \centerline{\includegraphics[width=2.6in]{fig/layerlsb.eps}}
+    \centerline{\includegraphics[width=2.5in]{fig/layerlsb.eps}}
     \caption{An illustrative example of LayerLSB structure. The circles with the same color indicate the same original data point. The number inside each circle is the $z$-value of that point in a particular LSB-tree.}
     \label{fig:layerlsb}
 \end{figure}
 
-We propose LayerLSB structure by exploring the density of $z$-values. Since the queries falling in high density ranges usually exhibit low search quality, extra efforts are put into building indices for these queries. Figure \ref{fig:layerlsb} shows an illustrative example of LayerLSB structure. The leaf nodes in high density ranges are rehashed in multiple independent child LSB-trees. These leaf nodes in parent tree are merged as a \emph{supernode}. The original $z$-values obtained in parent LSB-tree are retained in the first child tree. Two extra child trees with a new set of LSB parameters are further created. As a result, new $z$-values of these rehashed data points are obtained.
+We propose LayerLSB structure by exploring the density of $z$-values. Since the queries falling in high density ranges usually exhibit low search quality, extra efforts are put into building indices for these queries. Figure \ref{fig:layerlsb} shows an illustrative example of LayerLSB structure. The leaf nodes in high density ranges are rehashed in multiple independent child LSB-trees. These leaf nodes in parent tree are merged as a \emph{supernode}. The original $z$-values obtained in parent LSB-tree are retained in the first child tree. Two extra child trees with a new set of LSB parameters are further created. As a result, new $z$-values of these rehashed points are obtained.
 
 Even though only two levels are shown in Figure \ref{fig:layerlsb}, it is possible to further rehash the level-1 child LSB leaf nodes and create level-2 child LSB-trees. This results in a \emph{multi-layered} LSB-trees structure. This variation of $z$-values' order achieved by extra LSHs will increase the probability of returning the real $k$NNs. Comparing to blindly creating more LSB-trees without discrimination, great efforts can be saved by targeted rehashing. A small number of root level LayerLSB-trees is enough to achieve high search quality.

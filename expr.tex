@@ -40,7 +40,6 @@ Mnist & 60,000 & 256 & 41MB\\
 \hline
 BigCross & 11,620,300 & 57 & 3.31GB\\
 \hline
-\vspace{-0.2in}
 \end{tabular}
 \end{table}
 
@@ -142,7 +141,7 @@ So a small ratio implies high query accuracy. An average of the error ratios fro
 
 \subsubsection{Parameters Setting}
 
-The original LSH indices for these datasets are first built with parameters $l=3,m=3$ (We will also show the effect of different $l$ and $m$ in Sec. \ref{}).$w$ is set to satisfy a predefined accuracy which is different for different experiments. The number of returned NNs $k$ is set to 20 unless particularly mentioned. $r^*$ is estimated by sampling 1\% data points as discussed in Section \ref{sec:layerlsh:param}, which differs with respect to $k$ and dataset. The LayerLSH parameters are set as $\alpha=0.9, \beta=0.005$ unless particularly mentioned. And none of these two parameters are primarily chosen, so that the algorithm will perform query processing by ``averaging'' these two requirements as discussed in Section \ref{sec:layerlsh:query}.
+The original LSH indices for these datasets are first built with parameters $l=3,m=3$ (The effect of different $l$ and $m$ will be shown in Sec. \ref{sec:expr:param}).$w$ is set to satisfy a predefined accuracy which is different for different experiments. The number of returned NNs $k$ is set to 20 unless particularly mentioned. $r^*$ is estimated by sampling 1\% data points as discussed in Section \ref{sec:layerlsh:param}, which differs with respect to $k$ and dataset. The LayerLSH parameters are set as $\alpha=0.9, \beta=0.005$ unless particularly mentioned. And none of these two parameters are primarily chosen, so that the algorithm will perform query processing by ``averaging'' these two requirements as discussed in Section \ref{sec:layerlsh:query}.
 
 \subsection{Overal Performance}
 
@@ -170,7 +169,6 @@ We compare DSH and LayerDSH using the five small real datasets. In DSH, we sampl
 
 Figure \ref{fig:dshresult} shows the query accuracy with various query cost for different types of queries. We can see that, with respect to a specific type of queries, LayerDSH always outperforms DSH. In addition, DSH and LayerDSH exhibit better accuracy for sparse queries than dense queries, which is different from LSH and LayerLSH.
 
-\subsection{}
 
 \subsection{Space Consumption}
 
@@ -240,7 +238,7 @@ We show the LSH building time and the LayerLSH rebuilding time when $\beta=0.1\%
 \subsection{Parameter Studies}
 \label{sec:expr:param}
 
-In this study, we investigate the parameters that potentially affect the performance of LayerLSH, and suggest guidelines for parameters setting. These parameters include $k$, the expected recall $\alpha$ that implies the accuracy, and the expected precision $\beta$ that implies the efficiency. All the experiments are launched on the KDD dataset. In order to comparably show the effects of these parameters, we show the error ratio and query cost in the same scale in Figure \ref{fig:effect:k}, Figure \ref{fig:effect:alpha}, and Figure \ref{fig:effect:beta}. Figure \ref{fig:effect:alpharecall} shows recall rather than error ratio.
+In this study, we investigate the parameters that potentially affect the performance of LayerLSH, and suggest guidelines for parameters setting. These parameters include $k$, the expected recall $\alpha$ that implies the accuracy, and the expected precision $\beta$ that implies the efficiencyAll the experiments are launched on the KDD dataset. In order to comparably show the effects of these parameters, we show the error ratio and query cost in the same scale in Figure \ref{fig:effect:k}, Figure \ref{fig:effect:alpha}, and Figure \ref{fig:effect:beta}. Figure \ref{fig:effect:alpharecall} shows recall rather than error ratio.
 
 \begin{figure*}[!t]
 %\vspace{-0.2in}
@@ -272,16 +270,64 @@ We next study the effect of $\alpha$ by varying $\alpha$ from 0.1 to 0.95 and fi
 
 We also study the effect of $\beta$ by varying $\beta$ from 0.0001 to 0.1 and fixing $k=20, \alpha=0.9$. Figure \ref{fig:effect:beta} shows the results. The query cost drops dramatically when $\beta$ increases. At the same time, the error ratio also increases as expected. We can learn that it is not suggested to set $\beta$ too small when expecting a lower error ratio, since it is not worth due to the significant query cost.
 
-different l and m
+In addition, we evaluate the effect of different $l$ and $m$ when comparing LSH and LayerLSH on the KDD dataset. The error ratio and query cost results are shown in Table \ref{tab:lm}. We can see that LayerLSH constantly outperforms LSH on both query accuracy and query cost when varying $l$ and $m$. After bucket split, a large number of sparse buckets come up, which will trigger more nearby bucket search operations. This helps reduce the error ratio a lot.
+
+\begin{table}[!htb]
+\vspace{-0.1in}
+    \caption{Effect of different $l$ and $m$}
+    %\vspace{-0.05in}
+    \label{tab:lm}
+    \centering
+    \small
+    \begin{tabular}{c|c|c|c|c|c|c|c}
+    \hline
+  \multicolumn{2}{c}{} & \multicolumn{2}{|c}{$m=5$} & \multicolumn{2}{|c}{$m=6$} & \multicolumn{2}{|c}{$m=8$} \\
+ \cline{3-4}
+     \multicolumn{2}{c|}{}  & lsh & layerlsh & \multicolumn{2}{c|}{} & \multicolumn{2}{c}{} \\
+\hline\hline
+\multirow{2}{*}{\tabincell{c}{l=3}} & ratio & 1.157 & 1.125 & 1.297 & 1.231 & 1.759 & 1.593\\
+\cline{2-8}
+ & cost & 1706 & 1578 & 690 & 683 & 232 & 206\\
+\hline
+\multirow{2}{*}{\tabincell{c}{l=5}} & ratio & 1.093 & 1.087 & 1.138 & 1.114 & 1.573 & 1.379\\
+\cline{2-8}
+ & cost & 2900 & 1994 & 1501 & 1482 & 472 & 427\\
+\hline
+\multirow{2}{*}{\tabincell{c}{l=8}} & ratio & 1.061 & 1.058 & 1.095 & 1.093 & 1.322 & 1.251\\
+\cline{2-8}
+ & cost & 3760 & 3433 & 2479 & 2081 & 603 & 548\\
+\hline
+\multirow{2}{*}{\tabincell{c}{l=10}} & ratio & 1.041 & 1.038 & 1.069 & 1.062 & 1.291 & 1.182\\
+\cline{2-8}
+ & cost & 5873 & 4719 & 2634 & 2564 & 732 & 701\\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Handling Stream Data}
+\label{sec:expr:stream}
+
+We illustrate LayerLSH's ability for handling stream data in this experiment. We prepare a sequence of points from the KDD dataset and use Algorithm \ref{alg:stream} to process these points one by one. The maximum tolerance parameter $\epsilon_m=0.6$ and the caching tolerance parameter $\epsilon_c=0.2$. The time window $W$ is set as 0.5s. We measure the processing throughput every 50ms time unit. Note that, the overloaded bucket will be split during this process, and the throughput could be affected. At the same time, we use another thread to query a specific point's kNNs after each insertion and record the number of returned candidates for distance measurements, which is considered as query cost.
+
+\begin{figure}[t]
+%\vspace{-0.1in}
+    \centerline{\includegraphics[width=2.8in]{fig/streaminsert.eps}}
+    \vspace{-0.05in}
+    \caption{The processing throughput and query cost for a sequence of insertions.}
+    %\vspace{-0.2in}
+    \label{fig:streaminsert}
+\end{figure}
+
+The processing throughput and query cost results are shown in Figure \ref{fig:streaminsert}. We can see that the processing throughput is obviously reduced after each time window (0.5s and 1s) since many overloaded buckets will be split at that time. Note that, the throughput may also drop within a time window since some buckets might be seriously overloaded (i.e., the bucket size is larger than $(1+\epsilon_m)\cdot T_u$) and cannot wait for the time window to end. The query cost for a specific point will be continuously increased until some of its host buckets are split. From this figure, this happens after the first time window (0.5s). It is probably because that one of the query's host buckets is split. In addition, the throughput should be affected by $\epsilon_m$ and $\epsilon_c$. We run experiments and see that the throughput is increased when increasing $\epsilon_m$. For $\epsilon_m=(0.2,0.4,0.6,0.8,1)$, the average throughput results is $(1.25,1.49,1.66,1.77,2.28)\times 10^5$ pts/s.
 
 \subsection{Distributed All-Pairs Computation}
 \label{sec:expr:allpair}
 
-In Section \ref{sec:distributed}, we introduce a use case of distributed all-pairs computation, i.e., point density evaluation. We conduct experiments to show the benefit of our proposed multi-layered LSH structure in distributed computing. The experiment is performed in a large distributed cluster which contains 64 m1.medium Amazon EC2 instances. Each instance is equipped with 1 vCPU, 3.75GB memory, and 410GB disk. We utilize LSH and LayerLSH to partition the BigCross dataset and approximate the point densities by using Hadoop MapReduce. The MapReduce implementation involves two jobs. The first performs LSH partition and all-pairs computation locally. The second job aggregates the local results. The LSH parameters are set as $l=3, m=3$. The expected accuracy is set to 0.95 such that $w$ can be computed based on Equation (\ref{eq:prob2}), since the radius for evaluating point density is given. In LayerLSH, the bucket size limit is set as 10000 rather than being set according to precision rate, since this is not a $k$NN query application. In addition, similar sparse buckets are merged to further improve accuracy and to reduce number of partitions. The lower bound of bucket size is set as 1000. The number of reduce tasks in Hadoop is set as 256.
+In Section \ref{sec:distributed}, we introduce a use case of distributed all-pairs computation, i.e., point density evaluation. We conduct experiments to show the benefit of our proposed multi-layered LSH structure in distributed computing. The experiment is performed in a large distributed cluster which contains 64 m1.medium Amazon EC2 instances. Each instance is equipped with 1 vCPU, 3.75GB memory, and 410GB disk. We utilize LSH and LayerLSH to partition the BigCross dataset and approximate the point densities by using Hadoop MapReduce. The MapReduce implementation involves two jobs. The first performs LSH partition and all-pairs computation locally. The second job aggregates the local results. The LSH parameters are set as $l=3, m=3$. The expected accuracy is set to 0.95 such that $w$ can be computed based on Equation (\ref{eq:prob2}), since the radius for evaluating point density is given. In LayerLSH, the bucket size limit is set as 10000 rather than being set according to precision rate, since this is not a $k$NN query application. In addition, similar sparse buckets are merged to further improve accuracy and to reduce number of partitions. The lower bound of bucket size is set as 1000. The number of reduce tasks is set as 256.
 
 \begin{figure}[t]
 %\vspace{-0.1in}
-    \centerline{\includegraphics[angle=-90, width=2.2in]{fig/amazon_buckets.eps}}
+    \centerline{\includegraphics[angle=-90, width=2in]{fig/amazon_buckets.eps}}
     %\vspace{-0.05in}
     \caption{The distribution of bucket size in LSH and LayerLSH (BigCross).}
     %\vspace{-0.2in}
