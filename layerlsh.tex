@@ -249,10 +249,9 @@ LayerLSH integrates the idea of multi-probe LSH, which identifies the densities 
 
 
 \subsection{Supporting Dynamic Data Stream}
+\label{sec:layerlsh:stream}
 
-To deal with dynamic data, we need to make LayerLSH support point insertions and deletions. Algorithm \ref{alg:split} can be slightly changed for updating the index structure, where the input is the continuous insertions or deletions. A point is inserted into or deleted from a specified bucket followed by checking the bucket size. If the bucket size is bigger than $T_u$ after insertions, the bucket will be split. If the bucket size is smaller than $T_l$ after deletions, it will be marked as underloaded, and several similar underloaded buckets will be searched together when query processing.
-
-However, the naive implementation may result in too many unnecessary bucket splits. For instance, an insertion followed by multiple deletions to a full bucket results in unnecessary bucket split. To alleviate this problem, we introduce the \textit{time window} concept and buffer these insertions/deletions within a time window range. Basically, in a time window, if the bucket size does not exceed a predefined \textit{maximum tolerance}, it will not be split, otherwise, it will still be split. The maximum tolerance of bucket size should be a little bit larger than the original upper bound size $T_u$, which implies the effect of buffering. After each time window, all the buckets are evaluated to determine whether they should be split by comparing their sizes with $T_u$. By introducing the time window based buffering, a large number of unnecessary bucket splits can be avoided so that the processing throughput is expected to be higher, at the expanse that the query cost can be increased due to the delayed bucket splits. The tradeoff between processing throughput and query cost can be adjusted by tuning the maximum tolerance parameter, the effect of which will be shown in Section \ref{sec:expr}.
+To deal with dynamic data, we need to make LayerLSH support continuous point insertions and deletions. A naive implementation can be described as follows. A point is inserted into or deleted from a specified bucket followed by checking the bucket size. If the bucket size is bigger than the upper bound $T_u$ after insertions, the bucket will be split. If the bucket size is smaller than the lower bound $T_l$ after deletions, it will be marked as underloaded, and several similar underloaded buckets will be searched together when query processing.
 
 \begin{algorithm}[t]
 \SetNoFillComment
@@ -261,17 +260,21 @@ However, the naive implementation may result in too many unnecessary bucket spli
 \SetKwFunction{RecursSplit}{RecursSplit}
 \SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
 
-\Input{new point $p$, LayerLSH tables $HT=\{HT_1,\ldots,HT_l\}$, maximum tolerance $\epsilon_m$, caching tolerance $\epsilon_c$, time window $W$}
+\Input{newly arrived point $p$, LayerLSH tables $HT=\{HT_1,\ldots,HT_l\}$, maximum tolerance param $\epsilon_m$, caching tolerance param $\epsilon_c$, time window $W$}
 \Output{updated LayerLSH tables $HT$}
 \BlankLine
 \While{true}{
     blockread($p$)\;
-    $t_c\leftarrow$ current time\;
+    $t_c\leftarrow$ obtain current time\;
     \If{$t_c-t_l\geq W$}{
-        recursively split $HT$ according to $(1+\epsilon_c)\cdot T_u$\;
-        $t_l\leftarrow$ current time;
+        split the buckets in $HT$ whose sizes are bigger than the relaxed upper bound $(1+\epsilon_c)\cdot T_u$\;
+        $t_l\leftarrow$ obtain current time;
     }
-    \StreamInsert($p$, $HT$)\;
+    status$\leftarrow$\StreamInsert($p$, $HT$)\;
+    \If{\text{status} $==$ overloaded}{
+        $HT_{child}\leftarrow$ split the overloaded bucket and create child hash tables\;
+        Let $b$ point to $HT_{child}$;
+    }
 }
 \BlankLine
 \Fn{\StreamInsert($p$, $HT$)}{\
@@ -279,23 +282,28 @@ However, the naive implementation may result in too many unnecessary bucket spli
         $b\leftarrow$ locate bucket with hash key $\{h_1(p),\ldots,h_m(p)\}$\;
         \If{$b$ is a pointer bucket}{
             $HT_{child}\leftarrow$ locate the child hash tables $b$ points to\;
-            status$\leftarrow$\StreamInsert($p$, $HT_{child}$, $R'$, $P'$)\;
-            \If{status$==$overloaded}{
-                $HT_{child}\leftarrow$ resplit $HT_{child}$ according to the table size);
+            status$\leftarrow$\StreamInsert($p$, $HT_{child}$)\;
+            \If{\text{status} $==$ overloaded}{
+                resplit $HT_{child}$ based on the updated bucket size;
             }
         }
         \ElseIf{$b$ is a data bucket}{
             \If{$|b|>(1+\epsilon_m)\cdot T_u$}{
                 return $overloaded$;
             }
-            return $success$;
         }
     }
     return $success$;
 }
-\caption{Streamed Insertions in LayerLSH}
-\label{alg:lshquery}
+\caption{Streaming Inserts in LayerLSH}
+\label{alg:stream}
 \end{algorithm}
+
+
+However, the naive implementation may result in too many unnecessary bucket splits. For instance, an insertion followed by multiple deletions to a nearly full bucket may result in unnecessary bucket split. To alleviate this problem, we introduce the \textit{time window} concept and buffer these insertions/deletions within a time window range, the process of which is shown in Algorithm \ref{alg:stream}. Basically, in a time window, if the bucket size does not exceed a predefined \textit{maximum tolerance} $(1+\epsilon_m)\cdot T_u$, it will not be split, where $\epsilon_m>0$ and $T_u$ is the original bucket size upper bound. Otherwise, it will still be split (Line 10). The maximum tolerance of bucket size implies the effect of buffering. The bigger the $\epsilon_m$ is, the more insertions can be buffered. Note that, if the overloaded bucket is already in a child hash tables, we will resplit the child hash tables based on the newly updated bucket size (Line 21) instead of recursively splitting the overloaded bucket. This is because that, if the recursive split is used, the continuous insertions might result in very deep search path according to LayerLSH's tree-like structure, which could degrade the query performance.
+
+After each time window, all the buckets are evaluated to be determined whether they should be split by comparing their sizes to a \emph{caching tolerance} $(1+\epsilon_c)\cdot T_u$ (Line 5), where $0<\epsilon_c<\epsilon_m$. We introduce the caching tolerance for avoiding unnecessary bucket splits after each time window. By introducing the time window based buffering, a large number of unnecessary bucket splits can be avoided so that the processing throughput is expected to be higher, at the expanse that the query cost can be increased due to the delayed bucket splits. The tradeoff between processing throughput and query cost can be adjusted by tuning the maximum tolerance parameter $\epsilon_m$ and caching tolerance parameter $\epsilon_c$.
+
 
 
 \begin{comment}
