@@ -1,10 +1,10 @@
-\documentclass{vldb}
+\documentclass[sigconf]{acmart}
 %\usepackage{times}
 
 % do not change these values
 %\baselineskip 12pt
 %\textheight 10in
-\textheight 674pt
+%\textheight 674pt
 %\textwidth 6.9in
 %\oddsidemargin -0.3in
 %\topmargin -0.3in
@@ -13,6 +13,24 @@
 
 %\usepackage[utf8]{inputenc}
 %\usepackage[english]{babel}
+%\setcopyright{licensedcagov}
+%\setcopyright{cagovmixed}
+%\setcopyright{licensedothergov}
+
+% DOI
+%\acmDOI{10.475/123_4}
+
+% ISBN
+%\acmISBN{123-4567-24-567/08/06}
+
+%Conference
+%\acmConference[WOODSTOCK'97]{ACM Woodstock conference}{July 1997}{El
+%  Paso, Texas USA}
+%\acmYear{1997}
+%\copyrightyear{2016}
+
+%\acmPrice{15.00}
+
 
 \usepackage{amsfonts}
 \usepackage{graphicx}
@@ -35,25 +53,24 @@
 \newcommand{\argmax}{\text{arg}\,\text{max}}
 
 %\theoremstyle{definition}
-\newtheorem{definition}{Definition}
+%\newtheorem{definition}{Definition}
 \newtheorem{prop}{Proposition}
-\newtheorem{lemma}{Lemma}
-\newtheorem{theorem}{Theorem}
+%\newtheorem{lemma}{Lemma}
+%\newtheorem{theorem}{Theorem}
 
 
 \title{LayerLSH: Rebuilding Locality-Sensitive Hashing Indices by Exploring Density of Hash Values}
-\author{
-\alignauthor
-Yanfeng Zhang, Xun Wei, Ge Yu\\
-      \affaddr{Northeast University, China}\\
-       \email{\{zhangyf, yuge\}@mail.neu.edu.cn, 1670851@stu.neu.edu.cn}
-}
-\date{}
-\maketitle
+
+
 
 \begin{abstract}
 Locality-sensitive hashing (LSH) is known as one of the most promising indexing methods for approximate nearest neighbors (NN) search. It has attracted extensive research efforts for improving search quality. Many LSH variants are proposed in recent years. However, most of these LSH-based index structures fail to take data distribution into account. They perform well in a uniform data distribution setting but exhibit instable performance when the data are skewed. As known, most real life data are skewed, which makes LSH suffer. In this paper, we observe that the skewness of hash values resulted from skewed data is a potential reason for performance degradation. To address this problem, we propose to rebuild LSH indices by exploring the density of hash values. The hash values in dense ranges are reorganized with a multi-layered structure, so that more efforts are put into indexing the dense hash values. We rebuild three representative LSH indices for illustration, the table-based structure E2LSH, the tree-based structure LSB, and the recently proposed data sensitive hashing DSH. We further discuss the benefit in distributed computing. Extensive experiments are conducted to show the effectiveness and efficiency of the reconstructed LSH indices.
 \end{abstract}
+
+\keywords{LSH, approximate query, nearest neighbors}
+
+
+\maketitle
 
 
 \input{intro}
