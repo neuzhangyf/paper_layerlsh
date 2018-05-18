@@ -153,7 +153,7 @@ The space consumption is the size of the index file which is used to store the i
 %In LSH, using fewer hash tables is supposed to take up less space, but this is not true for LayerLSH. This is because that more overloaded buckets and much denser buckets could exist when using a small number of LSH tables.
 
 \begin{table}[!htb]
-%\vspace{-0.1in}
+\vspace{-0.1in}
     \caption{Space consumption for LSH and LayerLSH}
     \vspace{-0.1in}
     \label{tab:space_lsh}
@@ -176,6 +176,7 @@ Audio & 126MB & 128MB & 130MB & 144MB \\
 Mnist & 185MB & 189MB & 196MB & 227MB\\
 \hline
 \end{tabular}
+\vspace{-0.1in}
 \end{table}
 
 In LayerLSH, the space consumption highly depends on the expected precision parameter $\beta$, which indicates the threshold for overloaded bucket. The bigger the $\beta$ is, the smaller bucket is preferred. Thus, a larger number of small buckets and more child hash tables are expected to be created, so that more space for indexing these buckets and hash tables are required. As shown in Table \ref{tab:space_lsh}, the index size is not increased too much which is acceptable. As will be seen later in Section \ref{sec:expr:param}, we can achieve good enough accuracy and efficiency when setting $\beta=0.5\%$
@@ -290,7 +291,7 @@ In addition, we evaluate the effect of different $l$ and $m$ when comparing LSH 
 \subsection{Handling Stream Data}
 \label{sec:expr:stream}
 
-We illustrate LayerLSH's ability for handling stream data in this experiment. We prepare a sequence of points from the KDD dataset and process these points one by one. The maximum tolerance parameter $\epsilon_m=0.6$ and the caching tolerance parameter $\epsilon_c=0.2$. The time window $W$ is set as 0.5s. We measure the processing throughput every 50ms time unit. Note that, the overloaded bucket will be split during this process, and the throughput could be affected. At the same time, we use another thread to query a specific point's kNNs after each insertion and record the number of returned candidates for distance measurements, which is considered as query cost.
+To illustrate LayerLSH's ability for handling stream data, we prepare a sequence of points from the KDD dataset and process these points one by one. The maximum tolerance parameter $\epsilon_m=0.6$ and the caching tolerance parameter $\epsilon_c=0.2$. The time window $W$ is set as 0.5s. We measure the processing throughput every 50ms time unit. Note that, the overloaded bucket will be split during this process, and the throughput could be affected. At the same time, we use another thread to query a specific point's kNNs after each insertion and record the number of returned candidates for distance measurements, which is considered as query cost.
 
 \begin{figure}[t]
 %\vspace{-0.1in}
