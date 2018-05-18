@@ -1,24 +1,21 @@
 \section{LayerLSH: Rebuild Basic LSH}
 \label{sec:reclsh}
 
-In this section, we rebuild the basic LSH index \cite{datar,Gionis:1999:SSH:645925.671516} by exploring the density of hash values and propose LayerLSH.
+%In this section, we rebuild the basic LSH index \cite{datar,Gionis:1999:SSH:645925.671516} by exploring the density of hash values and propose LayerLSH.
 
 
-\subsection{LayerLSH Structure}
-\label{sec:layerlsh:overview}
-
-As illustrated in Section \ref{sec:intro}, the query falling in dense buckets tends to result in high cost, while the query falling in sparse buckets tends to result in low accuracy. Our idea is to split the dense buckets and merge the sparse buckets, which is simple but empirically shown to be effective (Section \ref{sec:expr}). The basic LSH hashes the objects to a number of buckets in $l$ tables. With respect to each hash table, the similar objects are hashed to the same bucket with high probability. Suppose we have a set of 2-D data objects distributed as shown in the top of Figure \ref{fig:overview}. They are hashed to different buckets in two hash tables. Some of the buckets are lightly loaded, while some are heavily loaded. LayerLSH will rehash the objects residing in an overloaded bucket to a new set of hash tables, such that the overloaded bucket is rehashed into multiple groups of smaller buckets where each group corresponds to a new hash table. The overloaded buckets are rehashed recursively until no overloaded one exists. At meanwhile, the underloaded bucket will not be further processed but only be marked. When a query falls into the underloaded bucket, the query algorithm will simply expand the search scope and search the ``nearby'' buckets to improve the accuracy.
+As illustrated in Section \ref{sec:intro}, the query falling in dense buckets tends to result in high cost, while the query falling in sparse buckets tends to result in low accuracy. Our idea is to split the dense buckets and merge the sparse buckets, which is simple but empirically shown to be effective (Section \ref{sec:expr}). Suppose we have a set of 2-D data objects distributed as shown in the top of Figure \ref{fig:overview}. They are hashed to different buckets in two hash tables. Some of the buckets are lightly loaded, while some are heavily loaded. LayerLSH will rehash the objects residing in an overloaded bucket to a new set of hash tables, such that the overloaded bucket is rehashed into multiple groups of smaller buckets where each group corresponds to a new hash table. The overloaded buckets are rehashed recursively until no overloaded one exists. At meanwhile, the underloaded bucket will not be further processed but only be marked. When a query falls into the underloaded bucket, the query algorithm will simply expand the search scope and search the ``nearby'' buckets to improve the accuracy.
 
 \begin{figure}[t]
 \vspace{-0.1in}
-    \centerline{\includegraphics[width=3.2in]{fig/overview.eps}}
+    \centerline{\includegraphics[width=3in]{fig/overview.eps}}
      \vspace{-0.05in}
     \caption{An illustrative example of LayerLSH structure (a bucket with more than 5 objects is considered as an overloaded bucket).}
     \label{fig:overview}
     \vspace{-0.2in}
 \end{figure}
 
-It is notable that since limiting bucket size will reduce the accuracy from probability theory's point of view (as shown in Equation (\ref{eq:prob})). The objects in the overloaded bucket should be copied to more than one hash tables to compensate for the reduced accuracy. This is for sustaining the expected accuracy $P$ as depicted in Equation (\ref{eq:prob2}), which will be described in detail in Section \ref{sec:layerlsh:param}. Since the overloaded buckets are rehashed recursively, multiple layers of LSH tables are constructed. The root level (level 0) of the LayerLSH is exactly the same as the original LSH. The hash tables in higher levels are the new generated LSH tables for the rehashed buckets. Figure \ref{fig:overview} shows an illustrative example of the \emph{\textbf{multi-layered}} tree-like structure.
+It is notable that since limiting bucket size will reduce the accuracy from probability theory's point of view. The objects in the overloaded bucket should be copied to more than one hash tables to compensate for the reduced accuracy. This is for sustaining the expected accuracy $P$ as depicted in Equation (\ref{eq:prob2}), which will be described in detail in Section \ref{sec:layerlsh:param}. Since the overloaded buckets are rehashed recursively, multiple layers of LSH tables are constructed. The root level (level 0) of the LayerLSH is exactly the same as the original LSH. The hash tables in higher levels are the new generated LSH tables for the rehashed buckets. Figure \ref{fig:overview} shows an illustrative example of the \emph{\textbf{multi-layered}} tree-like structure.
 
 %When an overloaded bucket is split, $l$ independent \emph{child hash tables} are created, where the split bucket is referred to as \emph{parent bucket}. The points in the parent bucket are rehashed in these child hash tables. The contents (objects) of the child tables are copies of the parent bucket, so that the objects in the split bucket have $l$ copies. Not only the level-0 bucket can be split but also the overloaded buckets at higher levels. Therefore, a \emph{\textbf{multi-layered}} tree-like structure is formed.
 
@@ -26,7 +23,7 @@ It is notable that since limiting bucket size will reduce the accuracy from prob
 \subsection{Building LayerLSH}
 \label{sec:layerlsh:param}
 
-We rebuild the original hash tables in terms of two factors, the user specified expected recall and precision. Let $\text{KNN}(q,O)$ denote the set of $k$NNs of $q$. Given a query $q$ and a set of objects $O$, an approximate $k$NN query algorithm returns a set of candidates $\mathcal{C}$. We have the \textbf{recall} $\alpha=\frac{|\mathcal{C}\cap \text{KNN}(q,O)|}{|\text{KNN}(q,O)|}$, which implies the accuracy, and the \textbf{precision} $\beta=\frac{|\mathcal{C}\cap \text{KNN}(q,O)|}{|\mathcal{C}|}$, which implies the efficiency. Given $\alpha$ and $\beta$, we study the lower/upper bound size of each bucket as follows.
+We rebuild the original hash tables in terms of two factors, the user specified expected recall and precision. Let $\text{KNN}(q,O)$ denote the set of $k$NNs of $q$. Given a query $q$ and a set of objects $O$, an approximate $k$NN query algorithm returns a set of candidates $\mathcal{C}$. We have the \textbf{recall} $\alpha=\frac{|\mathcal{C}\cap \text{KNN}(q,O)|}{|\text{KNN}(q,O)|}$, which implies the accuracy, and the \textbf{precision} $\beta=\frac{|\mathcal{C}\cap \text{KNN}(q,O)|}{|\mathcal{C}|}$, which implies the efficiency. Given $\alpha$ and $\beta$, we study the lower/upper bound size of each bucket.
 
 \begin{prop}
 \label{theorem:bucketsize}
@@ -61,6 +58,7 @@ Given the constraints of the bucket size, we propose Algorithm \ref{alg:split} t
 \SetKwProg{Fn}{Function}{:}{end}
 \SetKwFunction{RecSplit}{RecursSplit}\SetKwFunction{FindLSHParam}{FindParam}\SetKwFunction{LSH}{LSH}
 \SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+\SetAlgoNoLine
 
 \Input{LSH hash tables $HT=\{HT_1,\ldots,HT_l\}$, LSH parameters $\{l,m,w\}$, $k$, $R=\alpha$, $P=\beta$}
 \Output{LayerLSH hash tables set}
@@ -90,7 +88,7 @@ In Algorithm \ref{alg:split}, we refer to the to-be-rehashed bucket as \emph{par
 
 \begin{prop}
 \label{prop:accuracy}
-\textbf{(For Accuracy)} Let $s_{(q,k)}$ denote the distance from a query $q$ to its $k$th NN. Suppose we can find a $r^*$ such that $r^*\geq s_{(q,k)}$ for any $q$. In order to NOT reduce the expected recall, the child LSH parameters $\{l_c,m_c\}$ should be chosen to satisfy:
+\textbf{(For Accuracy)} Let $s_{(q,k)}$ denote the distance from a query $q$ to its $k$th NN. Suppose we can find a $r^*$ such that $r^*\geq s_{(q,k)}$ for any $q$. In order to guarantee the expected recall, the child LSH parameters $\{l_c,m_c\}$ should be chosen to satisfy:
 \begin{equation}\label{eq:sustainprob}
     1-(1-p^{m_p+m_{c}})^{l_{c}}=p^{m_{p}},
 \end{equation}
@@ -128,9 +126,9 @@ On the other hand, after rehashing we also need to limit the number of child has
 
 %Note that, $S_c^*$ is unknown before bucket rehashing. We will try a $l_c$ and rehash the bucket. If some buckets are still overloaded, the bucket rehashing process is invoked again. This is the reason why a recursive rehashing process is designed.
 
-By combining Proposition \ref{prop:accuracy} and Proposition \ref{prop:efficiency}, we intend to obtain the available child LSH parameters $m_c$ and $l_c$, which are used during bucket rehashing (Line 8 in Algorithm \ref{alg:split}). However, there probably is no solution since the recall and precision requirements cannot be satisfied at the same time (i.e., $l_c$'s lower bound is greater than its upper bound). Furthermore, $S_c^*$ in Equation (\ref{eq:forefficiency}) is even unknown before bucket rehashing. In such a case, we first choose $m_c$ according to Equation (\ref{eq:forefficiency}), ignore the upper bound of $l_c$, and generate enough more child hash tables to sustain accuracy constraint according to Equation (\ref{eq:sustainprob}). We will further satisfy the efficiency constraint during the query processing.
+By combining Proposition \ref{prop:accuracy} and Proposition \ref{prop:efficiency}, we can obtain the available child LSH parameters $m_c$ and $l_c$, which are used during bucket rehashing (Line 8 in Algorithm \ref{alg:split}). However, there probably is no solution since the recall and precision requirements cannot be satisfied at the same time (i.e., $l_c$'s lower bound is greater than its upper bound). Furthermore, $S_c^*$ in Equation (\ref{eq:forefficiency}) is even unknown before bucket rehashing. In such a case, we first choose $m_c$ according to Equation (\ref{eq:forefficiency}), ignore the upper bound of $l_c$, and generate enough more child hash tables to sustain accuracy constraint according to Equation (\ref{eq:sustainprob}). We will further satisfy the efficiency constraint during the query processing.
 
-The reason why we perform the analysis by fixing $w$ is explained as follows. Given a query $q$, for any point, its probability (shown in Equation \ref{eq:prob}) to collide with $q$ depends on its distance to $q$ (i.e., $s$) and the partition width $w$. If adjusting $w$ is allowed, regarding a particular point, its probability to collide with $q$ would change after rehashing. The new probability $p(s, w)$ depends on a variable $s$ since $s$ is variant for different points. That means, the analysis in Proposition \ref{prop:accuracy} or \ref{prop:efficiency} should also consider $s$, the distance from a point to a query. Obviously, $s$ is unknown in prior since query is unknown in prior. This will bring significant challenges in analyzing accuracy and efficiency. Therefore, we propose to rehash data by fixing $w$.
+The reason why we perform the analysis by fixing $w$ is explained as follows. Given a query $q$, for any point, its probability (shown in Equation \ref{eq:prob}) to collide with $q$ depends on its distance to $q$ (i.e., $s$) and the partition width $w$. If adjusting $w$ is allowed, regarding a particular point, its probability to collide with $q$ would change after rehashing. The new probability $p(s, w)$ depends on a variable $s$ since $s$ is variant for different points. That means, the analysis in Proposition \ref{prop:accuracy} or \ref{prop:efficiency} should also consider $s$, the distance from a point to a query. Obviously, $s$ is unknown in prior since query is unknown in prior. This will bring big challenges in analyzing accuracy and efficiency. Therefore, we propose to fix $w$.
 
 %Specifically, we choose $m_c$ according to Equation (\ref{eq:forefficiency}). Thus, we will obtain $l_c$'s upper bound $\big\lfloor\frac{k}{S_c^*\cdot\beta\cdot l_p}\big\rfloor$ from Equation (\ref{eq:forefficiency}) and lower bound $\big\lceil log_{(1-p^{m_p+m_c})}(1-p^{m_p})\big\rceil$ from Equation (\ref{eq:sustainprob}). However, there probably is no solution since the recall and precision requirements cannot be satisfied at the same time (i.e., $l_c$'s lower bound is greater than its upper bound). In such a case, we ignore the upper bound of $l_c$ and generate enough more child hash tables to sustain accuracy constraint. We will further satisfy the efficiency constraint during the query processing.
 
@@ -159,15 +157,17 @@ where $p=p(r^*,w)$. $w$ is consistent with parent LSH parameter.
 \subsection{Query Processing}
 \label{sec:layerlsh:query}
 
-There are two kinds of buckets in LayerLSH, which should be differentiated during query processing. One kind that contains similar data objects, which are referred to as \emph{data buckets}. Another kind contains the pointers to child hash tables, which are referred to as \emph{pointer buckets}. In other words, in the LayerLSH tree-like structure, the leaf nodes are data buckets, while the internal nodes are pointer buckets.
+There are two kinds of buckets in LayerLSH, which should be differentiated during query processing. One kind that contains similar data objects, which are referred to as \emph{data buckets}. Another kind contains the pointers to child hash tables, which are referred to as \emph{pointer buckets}.
 
 \begin{algorithm}[t]
 \SetNoFillComment
+\SetAlgoNoLine
 \SetKwProg{Fn}{Function}{:}{end}
 \SetKwFunction{LayerLSHQuery}{LayerLSHQuery}
 \SetKwInOut{Input}{input}\SetKwInOut{Output}{output}
+\BlankLine
 
-\Input{query $q$, LayerLSH tables $HT=\{HT_1,\ldots,HT_l\}$, $k$, $R=\alpha$, $P=\beta$}
+\Input{query $q$, LSH tables $HT=\{HT_1,\ldots,HT_l\}$, $k$, $R=\alpha$, $P=\beta$}
 \Output{$k$NN candidates set $\mathcal{C}$}
 \BlankLine
 \Fn{\LayerLSHQuery($q$, $HT$, $R$, $P$, $\mathcal{C}$)}{\
@@ -209,7 +209,7 @@ If the positioned bucket is a data bucket and this bucket is underloaded (Line 1
 %However, multi-probe LSH performs nearby bucket searching without discrimination. The search of the dense bucket and its nearby buckets will return a large number of candidates but only with a limited accuracy improvement. In contrast, LayerLSH only searches for nearby buckets for sparse queries, which is more cost efficient.
 
 
-If the data bucket is not underloaded, the objects in that bucket are conditionally put into the candidates set $\mathcal{C}$ (Line 17). Recall that, it is possible that the specified recall and precision are conflict with each other. It is required to return all candidates from all hash tables in order to satisfy the recall requirement, but also required to return at most $T_u$ candidates from only a few hash tables to satisfy the precision requirement. LayerLSH will let users specify one primary choice, the expected recall $\alpha$ or the expected precision $\beta$. Then the query processing algorithm will correspondingly include all the objects in bucket to satisfy recall requirement (Line 18) or limit the number of returned candidates to satisfy precision requirement (Line 19). If both or none of recall and precision is primarily selected, LayerLSH balances these two factors and return at most $\frac{T_u+\frac{\sum_{i}^{l}|b_{(q,i)}|}{l}}{2}$ candidates, where $T_u$ is for precision requirement and $\frac{\sum_{i}^{l}|b_{(q,i)}|}{l}$ is for recall requirement (where $b_{(q,i)}$ is $q$'s bucket in the $i$th child hash table).
+If the data bucket is not underloaded, the objects in that bucket are conditionally put into the candidates set $\mathcal{C}$ (Line 17). Recall that, it is possible that the specified recall and precision are in conflict with each other. It is required to return all candidates from all hash tables in order to satisfy the recall requirement, but also required to return at most $T_u$ candidates from only a few hash tables to satisfy the precision requirement. LayerLSH will let users specify one primary choice, the expected recall $\alpha$ or the expected precision $\beta$. Then the query processing algorithm will correspondingly include all the objects in bucket to satisfy recall requirement (Line 18) or limit the number of returned candidates to satisfy precision requirement (Line 19). If both or none of recall and precision is primarily selected, LayerLSH balances these two factors and return at most $\frac{T_u+\frac{\sum_{i}^{l}|b_{(q,i)}|}{l}}{2}$ candidates, where $T_u$ is for precision requirement and $\frac{\sum_{i}^{l}|b_{(q,i)}|}{l}$ is for recall requirement (where $b_{(q,i)}$ is $q$'s bucket in the $i$th child hash table).
 
 
 
@@ -251,8 +251,11 @@ LayerLSH integrates the idea of multi-probe LSH, which identifies the densities 
 \subsection{Supporting Stream Data}
 \label{sec:layerlsh:stream}
 
-To deal with dynamic data, we need to make LayerLSH support continuous point insertions and deletions. A naive implementation is described as follows. A point is inserted into or deleted from a specified bucket followed by checking the bucket size. If the bucket size is larger than the upper bound $T_u$ after insertions, the bucket will be split. If the bucket size is smaller than the lower bound $T_l$ after deletions, it will be marked as underloaded, and several similar underloaded buckets will be searched together when query processing.
+To deal with dynamic data, LayerLSH needs to support continuous point insertions and deletions. A naive implementation could be letting LayerLSH check the bucket size after each insertion or deletion. However, this may result in too many unnecessary bucket splits. For instance, an insertion to a nearly full bucket followed by multiple deletions may result in unnecessary bucket split. To alleviate this problem, we introduce the \textit{time window} concept and buffer these insertions/deletions within a time window range. In a time window, if the bucket size does not exceed a predefined \textit{maximum tolerance} $(1+\epsilon_m)\cdot T_u$, it will not be split, where $\epsilon_m>0$ and $T_u$ is the original bucket size upper bound. Otherwise, it will still be split. The maximum tolerance of bucket size implies the effect of buffering. The bigger the $\epsilon_m$ is, the more insertions can be buffered. Note that, if the overloaded bucket is already in a child hash tables, we will resplit the child hash tables based on the newly updated bucket size instead of recursively splitting the overloaded bucket. This is because, if the recursive split is used, the continuous insertions might result in very deep search path in terms of LayerLSH's tree-like structure, which could degrade the query performance.
 
+%is described as follows. A point is inserted into or deleted from a specified bucket followed by checking the bucket size. If the bucket size is larger than the upper bound $T_u$ after insertions, the bucket will be split. If the bucket size is smaller than the lower bound $T_l$ after deletions, it will be marked as underloaded, and several similar underloaded buckets will be searched together when query processing.
+
+\begin{comment}
 \begin{algorithm}[t]
 \SetNoFillComment
 \SetKwProg{Fn}{Function}{:}{end}
@@ -298,11 +301,11 @@ To deal with dynamic data, we need to make LayerLSH support continuous point ins
 \caption{Streaming Inserts in LayerLSH}
 \label{alg:stream}
 \end{algorithm}
+\end{comment}
 
 
-However, the naive implementation may result in too many unnecessary bucket splits. For instance, an insertion to a nearly full bucket followed by multiple deletions may result in unnecessary bucket split. To alleviate this problem, we introduce the \textit{time window} concept and buffer these insertions/deletions within a time window range, the process of which is shown in Algorithm \ref{alg:stream}. Basically, in a time window, if the bucket size does not exceed a predefined \textit{maximum tolerance} $(1+\epsilon_m)\cdot T_u$, it will not be split, where $\epsilon_m>0$ and $T_u$ is the original bucket size upper bound. Otherwise, it will still be split (Line 10). The maximum tolerance of bucket size implies the effect of buffering. The bigger the $\epsilon_m$ is, the more insertions can be buffered. Note that, if the overloaded bucket is already in a child hash tables, we will resplit the child hash tables based on the newly updated bucket size (Line 21) instead of recursively splitting the overloaded bucket. This is because that, if the recursive split is used, the continuous insertions might result in very deep search path in terms of LayerLSH's tree-like structure, which could degrade the query performance.
 
-At the end of each time window, all the buckets are evaluated to be determined whether they should be split by comparing their sizes to a \emph{caching tolerance} $(1+\epsilon_c)\cdot T_u$ (Line 5), where $0<\epsilon_c<\epsilon_m$. We introduce the caching tolerance for avoiding unnecessary bucket splits after each time window. By introducing the time window based buffering, a large number of unnecessary bucket splits can be avoided so that the processing throughput is expected to be higher, at the expanse that the query cost can be increased due to the delayed bucket splits. The tradeoff between processing throughput and query cost can be adjusted by tuning the maximum tolerance parameter $\epsilon_m$ and caching tolerance parameter $\epsilon_c$.
+At the end of each time window, all the buckets are evaluated to be determined whether they should be split by comparing their sizes to a \emph{caching tolerance} $(1+\epsilon_c)\cdot T_u$, where $0<\epsilon_c<\epsilon_m$. We introduce the caching tolerance for avoiding unnecessary bucket splits after each time window. By introducing the time window based buffering, a large number of unnecessary bucket splits can be avoided so that the processing throughput is expected to be higher, at the expanse that the query cost can be increased due to the delayed bucket splits. The tradeoff between processing throughput and query cost can be adjusted by tuning the maximum tolerance parameter $\epsilon_m$ and caching tolerance parameter $\epsilon_c$.
 
 
 

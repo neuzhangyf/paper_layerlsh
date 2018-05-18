@@ -1,26 +1,16 @@
 \section{Experiments}
 \label{sec:expr}
 
-Based on LSH, LSB\footnote{http://www.cse.cuhk.edu.hk/~taoyf/paper/codes/lsb.zip}, and DSH\footnote{We implement DSH by ourselves because it is not public available.}, we implement LayerLSH, LayerLSB, and LayerDSH respectively. In this section, we evaluate the multi-layered version of these LSH variants.
+Based on LSH, LSB \cite{lsb}, and DSH\footnote{We implement DSH by ourselves because it is not public available.}, we implement LayerLSH, LayerLSB, and LayerDSH respectively.  The experiments were performed on a Ubuntu system equipped with one Intel(R) Xeon(R) 2.60GHz CPU, 32GB of memory.
 
-1. different l and m in layerlsh and lsh
-2. dynamic insertion/deletion performance in layerlsh
-3. disk space£¬layerlsh and lsh (optional)
-
-\subsection{Setup}
-We describe the experimental setup in this subsection. The experiments except for the distributed experiments (Section \ref{sec:expr:allpair}) were performed on a Ubuntu system equipped with one Intel(R) Xeon(R) 2.60GHz CPU, 32GB of memory.
-
-\subsubsection{Datasets and Queries}
-
-We evaluate our approach using six real datasets, including \textbf{KDD}\footnote{http://www.kdd.org/kdd-cup/view/kdd-cup-2004/Data}, \textbf{Forest}\footnote{http://archive.ics.uci.edu/ml/datasets/Covertype}, \textbf{Color}\footnote{http://kdd.ics.uci.edu/databases/CorelFeatures/}, \textbf{Audio}\footnote{http://www.cs.princeton.edu/cass/audio.tar.gz}, \textbf{Mnist}\footnote{http://yann.lecun.com/exdb/mnist/}, and a very large dataset \textbf{BigCross}\footnote{http://www.cs.unipaderbom.de/en/fachgebiete/agbloemer/\\
-research/clustering/streamkmpp}. Properties of these three datasets are summarized in Table \ref{tab:data}. In addition, we generate three sets of queries from each dataset. We first evaluate the density of each point, which is the number of neighbors in a given radius. We then extract the top 2\% highest density points as \textbf{dense queries} set, the top 2\% lowest density points as \textbf{sparse queries} set, and the randomly sampled 2\% points as \textbf{random queries} set.
+\Paragraph{Datasets and Queries} We evaluate our approach using six real datasets, including \textbf{KDD}\footnote{http://www.kdd.org/kdd-cup/view/kdd-cup-2004/Data}, \textbf{Forest}\footnote{http://archive.ics.uci.edu/ml/datasets/Covertype}, \textbf{Color}\footnote{http://kdd.ics.uci.edu/databases/CorelFeatures/}, \textbf{Audio}\footnote{http://www.cs.princeton.edu/cass/audio.tar.gz}, and \textbf{Mnist}\footnote{http://yann.lecun.com/exdb/mnist/}. Properties of these three datasets are summarized in Table \ref{tab:data}. We also generate three sets of queries from each dataset. We first evaluate the density of each point, which is the number of neighbors in a given radius, then extract the top 2\% highest density points as \textbf{dense queries}, the top 2\% lowest density points as \textbf{sparse queries}, and the randomly sampled 2\% points as \textbf{random queries}.
 
 %These real datasets exhibit various skewness. The skewness is captured by the variability of point densities. We show the 10th percentile, the 50th percentile and the98th percentile of the point densities for these datasets. The greater variation of these percentiles indicates a more skewed data distribution.
 
 \begin{table}[!htb]
 \vspace{-0.1in}
     \caption{Datasets}
-    %\vspace{-0.15in}
+    \vspace{-0.15in}
     \label{tab:data}
     \centering
     \small
@@ -38,9 +28,8 @@ Audio & 54,387 & 192 & 36MB\\
 \hline
 Mnist & 60,000 & 256 & 41MB\\
 \hline
-BigCross & 11,620,300 & 57 & 3.31GB\\
-\hline
 \end{tabular}
+\vspace{-0.1in}
 \end{table}
 
 \begin{figure*}[!t]
@@ -66,6 +55,7 @@ BigCross & 11,620,300 & 57 & 3.31GB\\
     \label{fig:ratio:mnist}
     \vspace{-0.1in}}
     }
+    \vspace{-0.1in}
 	\caption{LSH vs. LayerLSH.}
 	\label{fig:lshresult}
 \vspace{-0.1in}
@@ -94,6 +84,7 @@ BigCross & 11,620,300 & 57 & 3.31GB\\
     \label{fig:lsb:mnist}
     \vspace{-0.1in}}
     }
+    \vspace{-0.1in}
 	\caption{LSB vs. LayerLSB}
 	\label{fig:lsb}
 \vspace{-0.1in}
@@ -122,12 +113,11 @@ BigCross & 11,620,300 & 57 & 3.31GB\\
     \label{fig:ratio:mnist}
     \vspace{-0.1in}}
     }
+    \vspace{-0.1in}
 	\caption{DSH vs. LayerDSH.}
 	\label{fig:dshresult}
-\vspace{-0.1in}
+\vspace{-0.2in}
 \end{figure*}
-
-\subsubsection{Evaluation Metrics}
 
 \Paragraph{Query Accuracy} Query accuracy is measured by \emph{error ratio}. Given a query $q$, let $o_1^*,o_2^*,\ldots,o_k^*$ be the $k$NNs with respect to $q$. The approximated $k$NNs are $o_1,o_2,\ldots,o_k$. The approximate error ratio is computed as
 \begin{equation}
@@ -139,45 +129,33 @@ So a small ratio implies high query accuracy. An average of the error ratios fro
 \Paragraph{Query Cost} For LSH, LayerLSH, DSH, and LayerDSH, we evaluate the query cost in terms of the number of candidates to be checked for distance measurement. For LSB and LayerLSB, we evaluate the query cost in terms of the number of I/Os (with 4KB page) since LSB is disk-based.
 
 
-\subsubsection{Parameters Setting}
+\Paragraph{Parameters Setting} The original LSH indices for these datasets are first built with parameters $l=3,m=3$ (The effect of different $l$ and $m$ will be shown in Sec. \ref{sec:expr:param}).$w$ is set to satisfy a predefined accuracy which is different for different experiments. The number of returned NNs $k$ is set to 20 unless particularly mentioned. $r^*$ is estimated by sampling 1\% data points as discussed in Section \ref{sec:layerlsh:param}, which differs with respect to $k$ and dataset. The LayerLSH parameters are set as $\alpha=0.9, \beta=0.005$ unless particularly mentioned. And none of these two parameters are primarily chosen, so that the algorithm will perform query processing by ``averaging'' these two requirements as discussed in Section \ref{sec:layerlsh:query}.
 
-The original LSH indices for these datasets are first built with parameters $l=3,m=3$ (The effect of different $l$ and $m$ will be shown in Sec. \ref{sec:expr:param}).$w$ is set to satisfy a predefined accuracy which is different for different experiments. The number of returned NNs $k$ is set to 20 unless particularly mentioned. $r^*$ is estimated by sampling 1\% data points as discussed in Section \ref{sec:layerlsh:param}, which differs with respect to $k$ and dataset. The LayerLSH parameters are set as $\alpha=0.9, \beta=0.005$ unless particularly mentioned. And none of these two parameters are primarily chosen, so that the algorithm will perform query processing by ``averaging'' these two requirements as discussed in Section \ref{sec:layerlsh:query}.
-
+\vspace{-0.1in}
 \subsection{Overal Performance}
+\label{sec:expr:overall}
 
-\subsubsection{LSH vs. LayerLSH}
+We compare the LSH variants and their layered versions when answering $k$NN query ($k=20$). Generally speaking, more query cost will result in high accuracy and vice versa. It does not make too much sense if comparing query cost or query accuracy independently, so we will show the query cost result and accuracy result in the same figure. We are trying to answer the question, which method results in the highest accuracy with the same query cost, or which method requires the lowest cost to achieve the same accuracy. We first build multiple LSH indices for these datasets by using different accuracy requirement parameters. By using different LSH indices, we expect to obtain various (cost, accuracy) pairs when answering $k$NN queries, which correspond to the multiple points in an (x, y)-plot. We then reconstruct the LSH indices and build their layered versions. By tuning the expected recall $\alpha$ and expected precision $\beta$, we can also create multiple layered indices with various (query cost, query accuracy) pairs.
 
-We compare the basic LSH and LayerLSH when answering $k$NN query ($k=20$) using the five small real datasets including KDD, Forest, Color, Audio, and Mnist. Generally speaking, more query cost will result in high accuracy and vice versa. It does not make too much sense if comparing query cost or query accuracy independently, so we will show the query cost result and accuracy result in the same figure. We are trying to answer the question, which method results in the highest accuracy with the same query cost, or which method requires the lowest cost to achieve the same accuracy. We first build multiple LSH indices for these datasets by using different accuracy requirement parameters. By using different LSH indices, we expect to obtain various (cost, accuracy) pairs when answering $k$NN queries, which correspond to the multiple points in an (x, y)-plot. We then reconstruct the LSH indices and build LayerLSH. By tuning the expected recall $\alpha$ and expected precision $\beta$, we can also create multiple LayerLSH indices with various (query cost, query accuracy) pairs.
-
-We show the results of LSH and LayerLSH when answering different types of queries in Figure \ref{fig:lshresult}. All the results are obtained by averaging 3 trials. The error ratio is lower with more query cost as expected. We can see that the query accuracy (reflected by error ratio) and the query cost (reflected by the number of candidates or distance measurements) vary a lot for different types of queries. With respect to the sparse queries, less accurate $k$NNs are returned and less number of distance measurements is required. With respect to the dense queries, more accurate $k$NNs are returned and more query cost is required. This is true for both LSH and LayerLSH.
-
-Figure \ref{fig:lshresult} also shows the comparison results between LSH and LayerLSH. To consider both query accuracy and query cost, a curve that corresponds to an LSH index and a specific query type exhibits better performance when it is close to the bottom left corner. We can see that, for all types of queries, LayerLSH requires much less query cost (say 5\%-20\% of that of LSH) to achieve the same error ratio.
+\Paragraph{LSH vs. LayerLSH} We show the results of LSH and LayerLSH when answering different types of queries in Figure \ref{fig:lshresult}. All the results are obtained by averaging 3 trials. The error ratio is lower with more query cost as expected. We can see that the query accuracy (reflected by error ratio) and the query cost (reflected by the number of candidates or distance measurements) vary a lot for different types of queries. With respect to the sparse queries, less accurate $k$NNs are returned and less number of distance measurements is required. With respect to the dense queries, more accurate $k$NNs are returned and more query cost is required. This is true for both LSH and LayerLSH. Figure \ref{fig:lshresult} also shows the comparison results between LSH and LayerLSH. To consider both query accuracy and query cost, a curve that corresponds to an LSH index and a specific query type exhibits better performance when it is close to the bottom left corner. We can see that, for all types of queries, LayerLSH requires much less query cost (say 5\%-20\% of that of LSH) to achieve the same error ratio.
 
 %By rehashing dense buckets with carefully chosen rehash parameters, the search in a dense bucket has been transformed to the search in multiple sparser buckets, while at the same time the query accuracy is not impacted. The reduction in I/O cost shows the efficiency of LayerLSH.
 
-\subsubsection{LSB vs. LayerLSB}
-
-We compare LSB and LayerLSB using the five small real datasets. In LSB, we set the parameters $l=3$, $w=16$. The page size is 4K bytes. We rebuild these LSB-trees by rehashing the leaf nodes in dense ranges to child trees. During query processing, in order to see the query accuracy with various query cost, we vary the number of expansions to obtain different (cost, accuracy) result pairs.
-
-Figure \ref{fig:lsb} shows the query accuracy with various query cost for different types of queries. The dense queries always show lower accuracy comparing to sparse queries. By rebuilding LSB-trees with multi-layered structures (LayerLSB), the query accuracy is improved a lot, especially for dense queries. In addition, we can see that LayerLSB can make the query accuracy more consistent for different types of queries. This is because that the skewed hash values ($z$-values) are balanced in LayerLSB-trees.
+\Paragraph{LSB vs. LayerLSB} In LSB, we set the parameters $l=3$, $w=16$. The page size is 4K bytes. We rebuild these LSB-trees by rehashing the leaf nodes in dense ranges to child trees. During query processing, in order to see the query accuracy with various query cost, we vary the number of expansions to obtain different (cost, accuracy) result pairs. Figure \ref{fig:lsb} shows the query accuracy with various query cost for different types of queries. The dense queries always show lower accuracy comparing to sparse queries. By rebuilding LSB-trees with multi-layered structures (LayerLSB), the query accuracy is improved a lot, especially for dense queries. In addition, we can see that LayerLSB can make the query accuracy more consistent for different types of queries. This is because the skewed hash values ($z$-values) are balanced in LayerLSB-trees.
 
 
-\subsubsection{DSH vs. LayerDSH}
-\label{sec:expr:dsh}
+\Paragraph{DSH vs. LayerDSH} In DSH, we sample 0.5\% of the data to learn the data-sensitive hash family. In addition, $p_1=0.9$ and $p_2=0.1$. We rebuild DSH hash tables by rehashing dense buckets and merging sparse buckets. We tune $l,m$ in DSH and $\alpha,\beta$ in LayerLSH so as to obtain various (query cost) result pairs. Figure \ref{fig:dshresult} shows the query accuracy with various query cost for different types of queries. We can see that, with respect to a specific type of queries, LayerDSH always outperforms DSH. In addition, DSH and LayerDSH exhibit better accuracy for sparse queries than dense queries, which is different from LSH and LayerLSH.
 
-We compare DSH and LayerDSH using the five small real datasets. In DSH, we sample 0.5\% of the data to learn the data-sensitive hash family. In addition, $p_1=0.9$ and $p_2=0.1$. We rebuild DSH hash tables by rehashing dense buckets and merging sparse buckets. We tune $l,m$ in DSH and $\alpha,\beta$ in LayerLSH so as to obtain various (query cost) result pairs.
-
-Figure \ref{fig:dshresult} shows the query accuracy with various query cost for different types of queries. We can see that, with respect to a specific type of queries, LayerDSH always outperforms DSH. In addition, DSH and LayerDSH exhibit better accuracy for sparse queries than dense queries, which is different from LSH and LayerLSH.
-
-
+\vspace{-0.1in}
 \subsection{Space Consumption}
 
-The space consumption is the size of the index file which is used to store the index structure. The space consumption of the basic LSH index and the LayerLSH index are listed in Table \ref{tab:space_lsh}, where $l=3, m=3, \alpha=0.9$ for both LSH and LayerLSH. Since the dense buckets are rehashed in extra hash tables and more copies of dense buckets exist, LayerLSH needs more space to store the extra indices. In LSH, using fewer hash tables is supposed to take up less space, but this is not true for LayerLSH. This is because that more overloaded buckets and much denser buckets could exist when using a small number of LSH tables.
+The space consumption is the size of the index file which is used to store the index. The space consumption of the basic LSH index and the LayerLSH index are listed in Table \ref{tab:space_lsh}, where $l=3, m=3, \alpha=0.9$ for both LSH and LayerLSH. Since the dense buckets are rehashed in extra hash tables and more copies of dense buckets exist, LayerLSH needs more space to store the extra indices.
+%In LSH, using fewer hash tables is supposed to take up less space, but this is not true for LayerLSH. This is because that more overloaded buckets and much denser buckets could exist when using a small number of LSH tables.
 
 \begin{table}[!htb]
-\vspace{-0.1in}
+%\vspace{-0.1in}
     \caption{Space consumption for LSH and LayerLSH}
-    %\vspace{-0.05in}
+    \vspace{-0.1in}
     \label{tab:space_lsh}
     \centering
     \small
@@ -202,15 +180,15 @@ Mnist & 185MB & 189MB & 196MB & 227MB\\
 
 In LayerLSH, the space consumption highly depends on the expected precision parameter $\beta$, which indicates the threshold for overloaded bucket. The bigger the $\beta$ is, the smaller bucket is preferred. Thus, a larger number of small buckets and more child hash tables are expected to be created, so that more space for indexing these buckets and hash tables are required. As shown in Table \ref{tab:space_lsh}, the index size is not increased too much which is acceptable. As will be seen later in Section \ref{sec:expr:param}, we can achieve good enough accuracy and efficiency when setting $\beta=0.5\%$
 
-
+\vspace{-0.1in}
 \subsection{Rebuilding Time}
 
-Rebuilding LSH indices is not free. We need extra time cost for building LayerLSH index. We measure the rebuilding time for LayerLSH in this experiment. The amount of rebuilding effort is highly related to the parameter $\beta$, which indicates the threshold for overloaded bucket. A smaller $\beta$ implies that higher query cost is tolerable, so that it is possible that only a small number of highly overloaded buckets are rehashed. In contrast, a bigger $\beta$ implies that a large number of buckets are probably recognized as overloaded buckets and great efforts can be put on rehashing these overloaded buckets. Accordingly, the rebuilding time increases as $\beta$ is increased.
+Rebuilding LSH indices is not free. We need extra time for building LayerLSH index. We measure the rebuilding time for LayerLSH in this experiment. The amount of rebuilding effort is highly related to the parameter $\beta$, which indicates the threshold for overloaded bucket. A smaller $\beta$ implies that higher query cost is tolerable, so that it is possible that only a small number of highly overloaded buckets are rehashed. In contrast, a bigger $\beta$ implies that a large number of buckets are probably recognized as overloaded buckets and great efforts can be put on rehashing. Accordingly, the rebuilding time increases as $\beta$ is increased.
 
 \begin{table}[!htb]
 \vspace{-0.1in}
     \caption{Rebuilding time for LayerLSH}
-    %\vspace{-0.05in}
+    \vspace{-0.1in}
     \label{tab:rebuildtime}
     \centering
     \small
@@ -231,17 +209,19 @@ Audio & 1.47s & 0.5s & 0.86s & 2.35s \\
 Mnist & 2.2s & 3.3s & 6.62s & 25.2s\\
 \hline
 \end{tabular}
+%\vspace{-0.1in}
 \end{table}
 
-We show the LSH building time and the LayerLSH rebuilding time when $\beta=0.1\%,0.2\%,0.5\%$ in Table \ref{tab:rebuildtime}. The LSH building time includes the data loading time and the index building time. The LayerLSH rebuilding time includes the LSH index loading time and the index rebuilding time. As can be seen, comparing to the original LSH indexing time, LayerLSH needs reasonable more time for rebuilding index for most datasets when $\beta$ is small. It is expected to require longer rebuilding time when $\beta$ is bigger. But as shown in the next experiment, by setting $\beta=0.5\%$ the accuracy and efficiency can be both good enough.
+We show the rebuilding time when $\beta=0.1\%,0.2\%,0.5\%$ in Table \ref{tab:rebuildtime}. The LSH building time includes the data loading time and the index building time. The LayerLSH rebuilding time includes the LSH index loading time and the index rebuilding time. As can be seen, comparing to the original LSH indexing time, LayerLSH needs reasonable more time for rebuilding index for most datasets when $\beta$ is small. It is expected to require longer rebuilding time when $\beta$ is bigger. But as shown in the next experiment, by setting $\beta=0.5\%$ the accuracy and efficiency can be both good enough.
 
+\vspace{-0.15in}
 \subsection{Parameter Studies}
 \label{sec:expr:param}
 
 In this study, we investigate the parameters that potentially affect the performance of LayerLSH, and suggest guidelines for parameters setting. These parameters include $k$, the expected recall $\alpha$ that implies the accuracy, and the expected precision $\beta$ that implies the efficiencyAll the experiments are launched on the KDD dataset. In order to comparably show the effects of these parameters, we show the error ratio and query cost in the same scale in Figure \ref{fig:effect:k}, Figure \ref{fig:effect:alpha}, and Figure \ref{fig:effect:beta}. Figure \ref{fig:effect:alpharecall} shows recall rather than error ratio.
 
 \begin{figure*}[!t]
-%\vspace{-0.2in}
+\vspace{-0.15in}
 	\centerline{
 	\subfloat[Effect of $k$]{\includegraphics[angle=-90, width=2in]{fig/lsh_effect_k.eps}
     \label{fig:effect:k}
@@ -258,10 +238,10 @@ In this study, we investigate the parameters that potentially affect the perform
     \subfloat[Effect of $\alpha$ on recall]{\includegraphics[angle=-90, width=2in]{fig/lsh_effect_alpharecall.eps}
     \label{fig:effect:alpharecall}
     }}
-    %\vspace{-0.05in}
+    \vspace{-0.1in}
 	\caption{Effect of parameters in LayerLSH (KDD)}
 	\label{fig:param}
-\vspace{-0.2in}
+\vspace{-0.15in}
 \end{figure*}
 
 We first study the effect of $k$ by varying $k$ from 5 to 100 and fixing $\alpha=0.9, \beta=0.005$. Figure \ref{fig:effect:k} shows the results. In general, the error ratio drops slightly when $k$ increases, and the query cost increases when $k$ increases. This is under expectation since we fix the expected precision $\beta=0.005$ and the query cost will increase as $k$ increases.
@@ -270,12 +250,10 @@ We next study the effect of $\alpha$ by varying $\alpha$ from 0.1 to 0.95 and fi
 
 We also study the effect of $\beta$ by varying $\beta$ from 0.0001 to 0.1 and fixing $k=20, \alpha=0.9$. Figure \ref{fig:effect:beta} shows the results. The query cost drops dramatically when $\beta$ increases. At the same time, the error ratio also increases as expected. We can learn that it is not suggested to set $\beta$ too small when expecting a lower error ratio, since it is not worth due to the significant query cost.
 
-In addition, we evaluate the effect of different $l$ and $m$ when comparing LSH and LayerLSH on the KDD dataset. The error ratio and query cost results are shown in Table \ref{tab:lm}. We can see that LayerLSH constantly outperforms LSH on both query accuracy and query cost when varying $l$ and $m$. After bucket split, a large number of sparse buckets come up, which will trigger more nearby bucket search operations. This helps reduce the error ratio a lot.
-
 \begin{table}[!htb]
 \vspace{-0.1in}
     \caption{Effect of different $l$ and $m$}
-    %\vspace{-0.05in}
+    \vspace{-0.1in}
     \label{tab:lm}
     \centering
     \small
@@ -302,24 +280,30 @@ In addition, we evaluate the effect of different $l$ and $m$ when comparing LSH 
  & cost & 5873 & 4719 & 2634 & 2564 & 732 & 701\\
 \hline
 \end{tabular}
+\vspace{-0.1in}
 \end{table}
+
+In addition, we evaluate the effect of different $l$ and $m$ when comparing LSH and LayerLSH on the KDD dataset. The error ratio and query cost results are shown in Table \ref{tab:lm}. We can see that LayerLSH constantly outperforms LSH on both query accuracy and query cost when varying $l$ and $m$. After bucket split, a large number of sparse buckets come up, which will trigger more nearby bucket search operations. This helps reduce the error ratio a lot.
+
+
 
 \subsection{Handling Stream Data}
 \label{sec:expr:stream}
 
-We illustrate LayerLSH's ability for handling stream data in this experiment. We prepare a sequence of points from the KDD dataset and use Algorithm \ref{alg:stream} to process these points one by one. The maximum tolerance parameter $\epsilon_m=0.6$ and the caching tolerance parameter $\epsilon_c=0.2$. The time window $W$ is set as 0.5s. We measure the processing throughput every 50ms time unit. Note that, the overloaded bucket will be split during this process, and the throughput could be affected. At the same time, we use another thread to query a specific point's kNNs after each insertion and record the number of returned candidates for distance measurements, which is considered as query cost.
+We illustrate LayerLSH's ability for handling stream data in this experiment. We prepare a sequence of points from the KDD dataset and process these points one by one. The maximum tolerance parameter $\epsilon_m=0.6$ and the caching tolerance parameter $\epsilon_c=0.2$. The time window $W$ is set as 0.5s. We measure the processing throughput every 50ms time unit. Note that, the overloaded bucket will be split during this process, and the throughput could be affected. At the same time, we use another thread to query a specific point's kNNs after each insertion and record the number of returned candidates for distance measurements, which is considered as query cost.
 
 \begin{figure}[t]
 %\vspace{-0.1in}
-    \centerline{\includegraphics[width=2.8in]{fig/streaminsert.eps}}
-    \vspace{-0.05in}
+    \centerline{\includegraphics[width=2.6in]{fig/streaminsert.eps}}
+    \vspace{-0.1in}
     \caption{The processing throughput and query cost for a sequence of insertions.}
-    %\vspace{-0.2in}
+    %\vspace{-0.1in}
     \label{fig:streaminsert}
 \end{figure}
 
-The processing throughput and query cost results are shown in Figure \ref{fig:streaminsert}. We can see that the processing throughput is obviously reduced after each time window (0.5s and 1s) since many overloaded buckets will be split at that time. Note that, the throughput may also drop within a time window since some buckets might be seriously overloaded (i.e., the bucket size is larger than $(1+\epsilon_m)\cdot T_u$) and cannot wait for the time window to end. The query cost for a specific point will be continuously increased until some of its host buckets are split. From this figure, this happens after the first time window (0.5s). It is probably because that one of the query's host buckets is split. In addition, the throughput should be affected by $\epsilon_m$ and $\epsilon_c$. We run experiments and see that the throughput is increased when increasing $\epsilon_m$. For $\epsilon_m=(0.2,0.4,0.6,0.8,1)$, the average throughput results is $(1.25,1.49,1.66,1.77,2.28)\times 10^5$ pts/s.
+The processing throughput and query cost results are shown in Figure \ref{fig:streaminsert}. We can see that the processing throughput is obviously reduced after each time window (0.5s and 1s) since many overloaded buckets will be split at that time. Note that, the throughput may also drop within a time window since some buckets might be seriously overloaded (i.e., the bucket size is larger than $(1+\epsilon_m)\cdot T_u$) and cannot wait for the time window to end. The query cost for a specific point will be continuously increased until some of its host buckets are split. From this figure, this happens after the first time window (0.5s). It is probably because one of the query's host buckets is split. In addition, the throughput should be affected by $\epsilon_m$ and $\epsilon_c$. We run experiments and see that the throughput is increased when increasing $\epsilon_m$. For $\epsilon_m=(0.2,0.4,0.6,0.8,1)$, the average throughput results is $(1.25,1.49,1.66,1.77,2.28)\times 10^5$ pts/s.
 
+\begin{comment}
 \subsection{Distributed All-Pairs Computation}
 \label{sec:expr:allpair}
 
@@ -354,6 +338,6 @@ By applying LSH and LayerLSH, the bucket size distributions are depicted in Figu
 \end{figure}
 
 The runtime of reduce tasks are shown in Figure \ref{fig:amazon}. Each color bar represents a reduce task, which performs local all-pairs computation. Each worker is assigned with multiple reduce tasks. The skewed distribution of bucket sizes leads to the skewed runtime of reduce tasks. We can see that the runtime of reduce tasks is seriously skewed when using LSH. While the runtime of reduce tasks in LayerLSH is more balanced. Accordingly, LSH-based point density evaluation requires much longer runtime than LayerLSH-based approach (20h58m2s vs. 1h36m38s). Since the rehashing strategy of LayerLSH does not reduce accuracy and the sparse buckets are merged, the accuracy is even higher by using LayerLSH\footnote{Because we cannot obtain the exact density values of all points in a reasonable time, we only show the sum of density values. In terms of point density's definition, the larger density should be more accurate.}.
-
+\end{comment}
 
 
