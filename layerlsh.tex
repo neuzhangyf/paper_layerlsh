@@ -7,12 +7,12 @@
 As illustrated in Section \ref{sec:intro}, the query falling in dense buckets tends to result in high cost, while the query falling in sparse buckets tends to result in low accuracy. Our idea is to split the dense buckets and merge the sparse buckets, which is simple but empirically shown to be effective (Section \ref{sec:expr}). Suppose we have a set of 2-D data objects distributed as shown in the top of Figure \ref{fig:overview}. They are hashed to different buckets in two hash tables. Some of the buckets are lightly loaded, while some are heavily loaded. LayerLSH will rehash the objects residing in an overloaded bucket to a new set of hash tables, such that the overloaded bucket is rehashed into multiple groups of smaller buckets where each group corresponds to a new hash table. The overloaded buckets are rehashed recursively until no overloaded one exists. At meanwhile, the underloaded bucket will not be further processed but only be marked. When a query falls into the underloaded bucket, the query algorithm will simply expand the search scope and search the ``nearby'' buckets to improve the accuracy.
 
 \begin{figure}[t]
-\vspace{-0.1in}
+%\vspace{-0.1in}
     \centerline{\includegraphics[width=3in]{fig/overview.eps}}
-     \vspace{-0.05in}
+     %\vspace{-0.05in}
     \caption{An illustrative example of LayerLSH structure (a bucket with more than 5 objects is considered as an overloaded bucket).}
     \label{fig:overview}
-    \vspace{-0.2in}
+    %\vspace{-0.2in}
 \end{figure}
 
 It is notable that since limiting bucket size will reduce the accuracy from probability theory's point of view. The objects in the overloaded bucket should be copied to more than one hash tables to compensate for the reduced accuracy. This is for sustaining the expected accuracy $P$ as depicted in Equation (\ref{eq:prob2}), which will be described in detail in Section \ref{sec:layerlsh:param}. Since the overloaded buckets are rehashed recursively, multiple layers of LSH tables are constructed. The root level (level 0) of the LayerLSH is exactly the same as the original LSH. The hash tables in higher levels are the new generated LSH tables for the rehashed buckets. Figure \ref{fig:overview} shows an illustrative example of the \emph{\textbf{multi-layered}} tree-like structure.
@@ -32,7 +32,7 @@ We rebuild the original hash tables in terms of two factors, the user specified 
     k\cdot(1-\sqrt[l]{1-\alpha})\leq S\leq \frac{k}{\beta\cdot l}.
 \end{equation}
 \end{prop}
-\begin{proof}
+\begin{IEEEproof}
 Suppose the LSH parameters are $\{l, m, w\}$. In each of the $l$ hash table, the expected size of the bucket that $q$ falls in is $\overline S=\sum_{o\in O}p(|q,o|,w)^{m}$ where $p(s, w)^m$ is defined in Equation (\ref{eq:prob}) and (\ref{eq:prob1}). Let $s_{(q,k)}$ denote the distance from $q$ to its $k$th NN. Then we have
 \begin{equation}\label{eq:recall2}
 \begin{aligned}
@@ -44,7 +44,7 @@ Suppose the LSH parameters are $\{l, m, w\}$. In each of the $l$ hash table, the
 The first ``$\geq$'' is true because the candidates for summation is reduced from $O$ to $\text{KNN}(q,O)$. The second ``$\geq$'' is true because for any $|q,o|\leq s_{(q,k)}$ we have $p(|q,o|,w)\geq p(s_{(q,k)},w)$ according to Equation (\ref{eq:prob}). The third ``$\geq$'' is true because in order to achieve the overall recall $\alpha$ over $l$ hash tables, the probability that $q$ and any of its $k$NNs collide in a specific hash table should be no less than $1-\sqrt[l]{1-\alpha}$ according to Equation (\ref{eq:prob2}). If we can make $p(s_{(q,k)},w)^m\geq 1-\sqrt[l]{1-\alpha}$ for $q$'s $k$th NN, it is also true for any other $k$NNs. Thus, the bucket size $S$ should satisfy $S\geq k\cdot(1-\sqrt[l]{1-\alpha})$.
 
 When all of $q$'s $k$NNs are contained in the returned candidates set, i.e., $\text{KNN}(q,O)\subset\mathcal{C}$, $|\mathcal{C}|$ can be as large as $\frac{k}{\beta}$ to satisfy the expected precision, otherwise $|\mathcal{C}|$ has to be smaller. Thus, $\frac{k}{\beta}$ is the upper bound of $|\mathcal{C}|$. Since there are $l$ hash tables, the candidates are retrieved from $l$ buckets. Let us assume the candidates are collected evenly from $l$ hash tables. Thus, the bucket size $S$ should satisfy $S\leq \frac{k}{\beta\cdot l}$.
-\end{proof}
+\end{IEEEproof}
 
 Note that, satisfying the above constraints does not necessarily guarantee the expected recall and precision but helps us identify the underloaded and overloaded buckets.
 
@@ -94,9 +94,9 @@ In Algorithm \ref{alg:split}, we refer to the to-be-rehashed bucket as \emph{par
 \end{equation}
 where $p=p(r^*,w)$ is defined in Equation (\ref{eq:prob}).
 \end{prop}
-\begin{proof}
+\begin{IEEEproof}
 Since $\forall q, r^*\geq s_{(q,k)}$, we have $p(r^*,w)^{m_p}\leq p(s_{(q,k)},w)^{m_p}$. That is, the probability that any query $q$ and its $k$th NN collide in the same bucket is no less than $p(r^*,w)^{m_p}$. If the probability $p(r^*,w)^{m_p}$ could be sustained after bucket rehashing, the probability that $q$ and any of its $k$NNs fall in the same bucket will not reduce, so that the expected recall $\alpha$ is guaranteed. Accordingly, in terms of Equation (\ref{eq:prob2}), the child LSH parameters $\{l_c,m_c,w\}$ should be chosen such that $1-[1-p(r^*,w)^{m_p+m_{c}}]^{l_{c}}\geq p(r^*,w)^{m_{p}}$. Further, since all the objects in child hash tables are originated from the parent bucket, the collision probability in child hash tables will never be greater than $p(r^*,w)^{m_{p}}$. Therefore, we aim to make $1-[1-p(r^*,w)^{m_p+m_{c}}]^{l_{c}}=p(r^*,w)^{m_{p}}$.
-\end{proof}
+\end{IEEEproof}
 
 In practice, $r^*$ can be approximately estimated by sampling. A number of sample objects are randomly selected to calculate their exact $k$NNs. The median of their $k$th NNs' distances is used to estimate $r^*$.
 
@@ -112,7 +112,7 @@ In practice, $r^*$ can be approximately estimated by sampling. A number of sampl
 where $p=p(r^*,w)$ is defined in Equation (\ref{eq:prob}), $\beta$ is the expected precision, and $S_c^*$ is the biggest bucket size among all child hash tables.
 %Assume $S$ is approximately proportional to $X_{r^*}\cdot p(r^*,w)^m_{p}$, where $X_{r^*}$ is the exact number of objects whose distances to $q$ are less than $r^*$, i.e., $S\approx \gamma\cdot X_{r^*}\cdot p(r^*,w)^m_{p}$.
 \end{prop}
-\begin{proof}
+\begin{IEEEproof}
 The expected size of the bucket that $q$ falls in is $\overline S=\sum_{o\in O}p(|q,o|,w)^{m_p}$. From this equation, we learn that the actual bucket size relates to two factors, 1) the number of ``close'' objects to $q$ and 2) the probability that these ``close'' objects fall in $q$'s bucket (determined by $\{m_p,w\}$). The more ``close'' objects to $q$, the more likely $S$ is larger. The larger $m_p$ is, the more likely $S$ is smaller. Let $X=\{o:|q,o|\leq r^*\}$ denote the set of objects within a range of $r^*$, which are considered as ``close'' objects. In other words, $|X|$ implies $q$'s density. Then we assume that the bucket size $S$ is proportional to $|X|$, i.e., $S\propto |X|$. On the other hand, to simplify the analysis and obtain an approximate answer, we assume that the probability for all objects in $X$ falling in $q$'s bucket is proportional to $p(r^*,w)^{m_p}$ that is fixed for all objects in $X$, i.e., $S\propto p^{m_p}$ where $p=p(r^*,w)$. Thus, we have $S\propto|X|\cdot p^{m_p}$.
 
 In order to satisfy the efficiency constraint $\frac{k}{S\cdot l_p}\geq\beta$, the bucket size $S$ should be reduced to less than $\frac{k}{\beta\cdot l_p}$. Since $S\propto|X|\cdot p^{m_p}$, $|X|\cdot p^{m_p}$ should be correspondingly reduced to $|X|\cdot p^{m_p+m_c}$. Therefore, we should choose $m_c$ to satisfy the following equation:
@@ -122,7 +122,7 @@ In order to satisfy the efficiency constraint $\frac{k}{S\cdot l_p}\geq\beta$, t
 Since $m_c$ should be an integer, we choose the result of the ceiling function, i.e., $m_c=\big\lceil log_{p}\big(\frac{k}{S\cdot\beta\cdot l_p}\big)\big\rceil$ to sustain the inequality of precision constraint.
 
 On the other hand, after rehashing we also need to limit the number of child hash tables in order to satisfy the efficiency constraint. Suppose $S_{(q,i)}$ is the size of a query $q$'s bucket (or multiple child buckets if it points to child hash tables) in child hash table $i$, we need to make sure $\sum_{i=1}^{l_c}S_{(q,i)}\leq \frac{k}{\beta\cdot l_p}$. Further, suppose $S_c^*$ is the biggest bucket size among all child hash tables, we have $\sum_{i=1}^{l_c}S_{(q,i)}\leq l_c*S_c^*$. Thus, by making $l_c*S_c^*\leq\frac{k}{\beta\cdot l_p}$, i.e., $l_c\leq\big\lfloor\frac{k}{S_c^*\cdot\beta\cdot l_p}\big\rfloor$ (since $l_c$ should be an integer), we can satisfy the efficiency requirement.
-\end{proof}
+\end{IEEEproof}
 
 %Note that, $S_c^*$ is unknown before bucket rehashing. We will try a $l_c$ and rehash the bucket. If some buckets are still overloaded, the bucket rehashing process is invoked again. This is the reason why a recursive rehashing process is designed.
 

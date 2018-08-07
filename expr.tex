@@ -8,9 +8,9 @@ Based on LSH, LSB \cite{lsb}, and DSH\footnote{We implement DSH by ourselves bec
 %These real datasets exhibit various skewness. The skewness is captured by the variability of point densities. We show the 10th percentile, the 50th percentile and the98th percentile of the point densities for these datasets. The greater variation of these percentiles indicates a more skewed data distribution.
 
 \begin{table}[!htb]
-\vspace{-0.1in}
+%\vspace{-0.1in}
     \caption{Datasets}
-    \vspace{-0.15in}
+    %\vspace{-0.15in}
     \label{tab:data}
     \centering
     \small
@@ -29,11 +29,11 @@ Audio & 54,387 & 192 & 36MB\\
 Mnist & 60,000 & 256 & 41MB\\
 \hline
 \end{tabular}
-\vspace{-0.1in}
+%\vspace{-0.1in}
 \end{table}
 
 \begin{figure*}[!t]
-\vspace{-0.2in}
+%\vspace{-0.2in}
 	\centerline{
 	\subfloat[KDD]{\includegraphics[angle=-90, width=1.6in]{fig/lsh_kdd.eps}
     \label{fig:ratio:kdd}
@@ -55,14 +55,14 @@ Mnist & 60,000 & 256 & 41MB\\
     \label{fig:ratio:mnist}
     \vspace{-0.1in}}
     }
-    \vspace{-0.1in}
+    %\vspace{-0.1in}
 	\caption{LSH vs. LayerLSH.}
 	\label{fig:lshresult}
-\vspace{-0.1in}
+%\vspace{-0.1in}
 \end{figure*}
 
 \begin{figure*}[!t]
-\vspace{-0.1in}
+%\vspace{-0.1in}
 	\centerline{
 	\subfloat[KDD]{\includegraphics[angle=-90, width=1.6in]{fig/lsb_kdd.eps}
     \label{fig:lsb:kdd}
@@ -84,14 +84,14 @@ Mnist & 60,000 & 256 & 41MB\\
     \label{fig:lsb:mnist}
     \vspace{-0.1in}}
     }
-    \vspace{-0.1in}
+    %\vspace{-0.1in}
 	\caption{LSB vs. LayerLSB}
 	\label{fig:lsb}
-\vspace{-0.1in}
+%\vspace{-0.1in}
 \end{figure*}
 
 \begin{figure*}[!t]
-\vspace{-0.1in}
+%\vspace{-0.1in}
 	\centerline{
 	\subfloat[KDD]{\includegraphics[angle=-90, width=1.6in]{fig/dsh_kdd.eps}
     \label{fig:ratio:kdd}
@@ -113,10 +113,10 @@ Mnist & 60,000 & 256 & 41MB\\
     \label{fig:ratio:mnist}
     \vspace{-0.1in}}
     }
-    \vspace{-0.1in}
+    %\vspace{-0.1in}
 	\caption{DSH vs. LayerDSH.}
 	\label{fig:dshresult}
-\vspace{-0.2in}
+%\vspace{-0.2in}
 \end{figure*}
 
 \Paragraph{Query Accuracy} Query accuracy is measured by \emph{error ratio}. Given a query $q$, let $o_1^*,o_2^*,\ldots,o_k^*$ be the $k$NNs with respect to $q$. The approximated $k$NNs are $o_1,o_2,\ldots,o_k$. The approximate error ratio is computed as
@@ -153,9 +153,9 @@ The space consumption is the size of the index file which is used to store the i
 %In LSH, using fewer hash tables is supposed to take up less space, but this is not true for LayerLSH. This is because that more overloaded buckets and much denser buckets could exist when using a small number of LSH tables.
 
 \begin{table}[!htb]
-\vspace{-0.1in}
+%\vspace{-0.1in}
     \caption{Space consumption for LSH and LayerLSH}
-    \vspace{-0.1in}
+    %\vspace{-0.1in}
     \label{tab:space_lsh}
     \centering
     \small
@@ -176,7 +176,7 @@ Audio & 126MB & 128MB & 130MB & 144MB \\
 Mnist & 185MB & 189MB & 196MB & 227MB\\
 \hline
 \end{tabular}
-\vspace{-0.1in}
+%\vspace{-0.1in}
 \end{table}
 
 In LayerLSH, the space consumption highly depends on the expected precision parameter $\beta$, which indicates the threshold for overloaded bucket. The bigger the $\beta$ is, the smaller bucket is preferred. Thus, a larger number of small buckets and more child hash tables are expected to be created, so that more space for indexing these buckets and hash tables are required. As shown in Table \ref{tab:space_lsh}, the index size is not increased too much which is acceptable. As will be seen later in Section \ref{sec:expr:param}, we can achieve good enough accuracy and efficiency when setting $\beta=0.5\%$
@@ -187,9 +187,9 @@ In LayerLSH, the space consumption highly depends on the expected precision para
 Rebuilding LSH indices is not free. We need extra time for building LayerLSH index. We measure the rebuilding time for LayerLSH in this experiment. The amount of rebuilding effort is highly related to the parameter $\beta$, which indicates the threshold for overloaded bucket. A smaller $\beta$ implies that higher query cost is tolerable, so that it is possible that only a small number of highly overloaded buckets are rehashed. In contrast, a bigger $\beta$ implies that a large number of buckets are probably recognized as overloaded buckets and great efforts can be put on rehashing. Accordingly, the rebuilding time increases as $\beta$ is increased.
 
 \begin{table}[!htb]
-\vspace{-0.1in}
+%\vspace{-0.1in}
     \caption{Rebuilding time for LayerLSH}
-    \vspace{-0.1in}
+    %\vspace{-0.1in}
     \label{tab:rebuildtime}
     \centering
     \small
@@ -222,7 +222,7 @@ We show the rebuilding time when $\beta=0.1\%,0.2\%,0.5\%$ in Table \ref{tab:reb
 In this study, we investigate the parameters that potentially affect the performance of LayerLSH, and suggest guidelines for parameters setting. These parameters include $k$, the expected recall $\alpha$ that implies the accuracy, and the expected precision $\beta$ that implies the efficiencyAll the experiments are launched on the KDD dataset. In order to comparably show the effects of these parameters, we show the error ratio and query cost in the same scale in Figure \ref{fig:effect:k}, Figure \ref{fig:effect:alpha}, and Figure \ref{fig:effect:beta}. Figure \ref{fig:effect:alpharecall} shows recall rather than error ratio.
 
 \begin{figure*}[!t]
-\vspace{-0.15in}
+%\vspace{-0.15in}
 	\centerline{
 	\subfloat[Effect of $k$]{\includegraphics[angle=-90, width=2in]{fig/lsh_effect_k.eps}
     \label{fig:effect:k}
@@ -239,10 +239,10 @@ In this study, we investigate the parameters that potentially affect the perform
     \subfloat[Effect of $\alpha$ on recall]{\includegraphics[angle=-90, width=2in]{fig/lsh_effect_alpharecall.eps}
     \label{fig:effect:alpharecall}
     }}
-    \vspace{-0.1in}
+    %\vspace{-0.1in}
 	\caption{Effect of parameters in LayerLSH (KDD)}
 	\label{fig:param}
-\vspace{-0.15in}
+%\vspace{-0.15in}
 \end{figure*}
 
 We first study the effect of $k$ by varying $k$ from 5 to 100 and fixing $\alpha=0.9, \beta=0.005$. Figure \ref{fig:effect:k} shows the results. In general, the error ratio drops slightly when $k$ increases, and the query cost increases when $k$ increases. This is under expectation since we fix the expected precision $\beta=0.005$ and the query cost will increase as $k$ increases.
@@ -252,9 +252,9 @@ We next study the effect of $\alpha$ by varying $\alpha$ from 0.1 to 0.95 and fi
 We also study the effect of $\beta$ by varying $\beta$ from 0.0001 to 0.1 and fixing $k=20, \alpha=0.9$. Figure \ref{fig:effect:beta} shows the results. The query cost drops dramatically when $\beta$ increases. At the same time, the error ratio also increases as expected. We can learn that it is not suggested to set $\beta$ too small when expecting a lower error ratio, since it is not worth due to the significant query cost.
 
 \begin{table}[!htb]
-\vspace{-0.1in}
+%\vspace{-0.1in}
     \caption{Effect of different $l$ and $m$}
-    \vspace{-0.1in}
+    %\vspace{-0.1in}
     \label{tab:lm}
     \centering
     \small
@@ -281,7 +281,7 @@ We also study the effect of $\beta$ by varying $\beta$ from 0.0001 to 0.1 and fi
  & cost & 5873 & 4719 & 2634 & 2564 & 732 & 701\\
 \hline
 \end{tabular}
-\vspace{-0.1in}
+%\vspace{-0.1in}
 \end{table}
 
 In addition, we evaluate the effect of different $l$ and $m$ when comparing LSH and LayerLSH on the KDD dataset. The error ratio and query cost results are shown in Table \ref{tab:lm}. We can see that LayerLSH constantly outperforms LSH on both query accuracy and query cost when varying $l$ and $m$. After bucket split, a large number of sparse buckets come up, which will trigger more nearby bucket search operations. This helps reduce the error ratio a lot.
@@ -296,7 +296,7 @@ To illustrate LayerLSH's ability for handling stream data, we prepare a sequence
 \begin{figure}[t]
 %\vspace{-0.1in}
     \centerline{\includegraphics[width=2.6in]{fig/streaminsert.eps}}
-    \vspace{-0.1in}
+    %\vspace{-0.1in}
     \caption{The processing throughput and query cost for a sequence of insertions.}
     %\vspace{-0.1in}
     \label{fig:streaminsert}
