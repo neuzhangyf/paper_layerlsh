@@ -1,6 +1,7 @@
 \section{Preliminaries}
 \label{sec:pre}
 
+\begin{comment}
 The problem of nearest neighbors search refers to finding objects that are similar to the query object. Our goal is to design an indexing scheme for approximate $k$NN queries with both high search quality and high efficiency. The typical $k$NN search problem is formally defined as follows.
 
 \begin{definition}
@@ -56,3 +57,97 @@ In order to reduce the loss of false negatives, a set of $l$ hash groups $\{G_1(
 Given a query $q$, a candidate set by the union of $l$ buckets that
 query $q$ is hashed to is generated. Then, these candidates are ranked according to their distances to $q$, and finally the top $k$ candidates are returned.
 %Note that, the theory foundation relies on a specified radius $r$. To answer a $k$NN query, we can either run repeatedly with different values of $\{r, cr, c^2r, \ldots\}$ or use a single ``magic'' radius to process different queries.
+\end{comment}
+
+\subsection{Problem Setting}
+
+The problem of nearest neighbors search refers to finding objects that are similar to the query object. The typical $k$NN search problem is formally defined as follows.
+
+\begin{definition}
+\label{def:knn}
+(\textbf{$k$NN}) Given an object $q$, a dataset $O$ and an integer $k$ ($k<|O|$), the $k$NN query returns a set of $k$ objects from $O$ denoted as $\text{KNN}(q,O)$, such that $\forall o\in \text{KNN}(q,O)$, $\forall o'\in O-\text{KNN}(q,O)$, $|q,o|\leq|q,o'|$, where $|\cdot,\cdot|$ denotes the distance between two objects.
+\end{definition}
+
+In this paper, we focus on answering \textbf{approximate} $k$NN queries for high-dimensional data in the Euclidean space. Our goal is to design an indexing scheme for approximate $k$NN queries with both high search quality and high efficiency.
+%For approximate $k$-NN query, we aim to find $k$ objects whose distances are within a small factor $(1+\epsilon)$ of the exact $k$-nearest neighbors' distances and minimize $\epsilon$. At the same time, we also aim to improve the efficiency and reduce the query cost, e.g., the number of distance measurements or disk I/Os.
+
+\subsection{Locality-Sensitive Hashing}
+
+The Locality-Sensitive Hashing (LSH)
+function has the property that points that are closer to each other
+have a higher probability of colliding than points that are farther
+apart \cite{orilsh}. Let $D$ be the dataset of $n$ data objects in $d$-dimensional Euclidean space $\mathbb{R}^d$ and let $|o_1,o_2|$ denote the Euclidean distance between two objects $o_1$ and $o_2$, $o_1,o_2\in D$. LSH is formally defined as
+follows.
+
+\begin{definition}
+\label{def:lsh}
+(\textbf{Locality Sensitive Hashing}) Given a distance $r$, an approximation ratio $c$ and two probability values $P1$ and $P2$, a hash function $h:\mathbb{R}^d\rightarrow U$ is called ($r,cr,P1,P2$)-sensitive if for any $o_1,o_2\in D$
+\begin{itemize}
+  \item If $|o_1,o_2|\leq r$ then $\text{Pr}[h(o_1)=h(o_2)]\geq P1$,
+  \item If $|o_1,o_2|> cr$ then $\text{Pr}[h(o_1)=h(o_2)]\leq P2$,
+\end{itemize}
+\end{definition}
+
+
+We pick $c>1$ and $P1\geq P2$. With these choices, nearby objects (i.e.
+those within distance $r$) have a greater chance of being hashed to
+the same value than points that are far apart, i.e. those at a
+distance greater than $cr$ away.
+
+The commonly used LSH family for Euclidean distance consists of LSH functions in the following form
+\cite{datar}:
+%
+\begin{equation}\label{eq:lsh}
+%
+    h(o)=\bigg\lfloor \frac{a\cdot o+b}{w}\bigg\rfloor
+%
+\end{equation}
+%
+where $a$ is a $d$-dimensional random vector, each entry of which is
+chosen independently from standard Gaussian distribution $\mathcal{N}(0,1)$ \cite{stabledist},
+$b$ is a real number chosen from $[0,w]$, and $w$ is also a real
+number representing the partition width of the LSH function.
+
+For two data objects $o_1$ and $o_2$, let $s=|o_1,o_2|$. The probability that $o_1$ and $o_2$ collide under a randomly chosen hash function $h$, denoted as $p(s,w)$, can be computed as follows \cite{datar}.
+\begin{equation}\label{eq:prob}
+\begin{aligned}
+p(s,w)&=Pr[h(o_1)=h(o_2)]\\
+      &=\int_{0}^{w}\frac{1}{s}f_2(\frac{t}{s})(1-\frac{t}{w})dt\\
+      &=1-2norm(-\frac{w}{s})-\frac{2s}{\sqrt{2\pi}w}(1-e^{-\frac{w^2}{2s^2}}),
+\end{aligned}
+\end{equation}
+where $f_2(x)$ is the density function of a Gaussian distribution \cite{datar}, i.e., $f_2(x)=\frac{2}{\sqrt{2\pi}}e^{-\frac{w^2}{2s^2}}$, and $norm(\cdot)$ represents the cumulative distribution function for a random variable that is distributed as Gaussian distribution.
+
+%The collision probability $p(s,w)$ decreases monotonically when $s$ increases but grows monotonically when $w$ rises. For a fixed $w$, the family of hash functions $h$ is $(r,cr,P1,P2)$-sensitive with $P1=p(r,w)$ and $P2=p(cr,w)$. When $r$ is set to 1, the function family is $(1,c,P1,P2)$-sensitive with $P1=p(1,w)$ and $P2=p(c,w)$, and $\frac{ln 1/P1}{ln 1/P2}\leq 1/c$.
+
+The locality-preserving property of LSH allows us to partition the set
+of objects based on their hash values. If two points $o_1$ and $o_2$ are
+hashed to the same bucket, $o_1$ and $o_2$ are close to each
+other with certain confidence. However, it is possible that two distant points happen to be hashed to
+the same bucket according to Equation (\ref{eq:lsh}). To reduce such
+\emph{false positives}, a group of $m$ hash functions
+$G(\cdot)=\{h_1(\cdot),h_2(\cdot),\ldots,h_m(\cdot)\}$ are employed. That is, only points sharing all the $m$ hash values are placed in the same bucket. Thus, each object $o$ is labeled with a compound hash key
+$G(o)=\{h_1(o),h_2(o),\ldots,h_m(o)\}$, which is considered as the bucket key. The probability that two objects collide is reduced as shown in Equation (\ref{eq:prob1}).
+\begin{equation}\label{eq:prob1}
+%
+\begin{aligned}
+%
+  Pr[G(o_1)=G(o_2)]&=\prod_{i=1}^m Pr[h_i(o_1)=h_i(o_2)]\\
+%
+&=p(s,w)^m
+%
+\end{aligned}
+%
+\end{equation}
+
+
+However, the probability $p(s,w)^m$ may be very small when $l$ is large, which may lead to a large number of \emph{false negatives}. In order to reduce the loss of false negatives, multiple hash tables are used. That is, a set of $l$ hash groups $\{G_1(\cdot),G_2(\cdot),\ldots,G_l(\cdot)\}$ are employed and $l$ hash tables are constructed (i.e., each object has $l$ copies in $l$ hash tables), hoping that the close points collide at least on one hash table. The final collision probability $P$ is shown in Equation (\ref{eq:prob2}).
+\begin{equation}\label{eq:prob2}
+%
+\begin{aligned}
+%
+  P=&1-\prod_{i=1}^l \Big\{1-Pr[G_i(o_1)=G_i(o_2)]\Big\}\\
+  =&1-[1-p(s,w)^m]^l
+\end{aligned}
+%
+\end{equation}
