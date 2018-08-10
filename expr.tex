@@ -13,7 +13,7 @@ Based on LSH, LSB \cite{lsb}, and DSH\footnote{We implement DSH by ourselves bec
     %\vspace{-0.15in}
     \label{tab:data}
     \centering
-    \small
+    %\small
     \begin{tabular}{c|c|c|c}
     \hline
    data & instances & dim & size\\
@@ -58,7 +58,7 @@ Mnist & 60,000 & 256 & 41MB\\
     %\vspace{-0.1in}
 	\caption{LSH vs. LayerLSH.}
 	\label{fig:lshresult}
-%\vspace{-0.1in}
+\vspace{-0.1in}
 \end{figure*}
 
 \begin{figure*}[!t]
@@ -87,7 +87,7 @@ Mnist & 60,000 & 256 & 41MB\\
     %\vspace{-0.1in}
 	\caption{LSB vs. LayerLSB}
 	\label{fig:lsb}
-%\vspace{-0.1in}
+\vspace{-0.1in}
 \end{figure*}
 
 \begin{figure*}[!t]
@@ -116,7 +116,7 @@ Mnist & 60,000 & 256 & 41MB\\
     %\vspace{-0.1in}
 	\caption{DSH vs. LayerDSH.}
 	\label{fig:dshresult}
-%\vspace{-0.2in}
+\vspace{-0.1in}
 \end{figure*}
 
 \Paragraph{Query Accuracy} Query accuracy is measured by \emph{error ratio}. Given a query $q$, let $o_1^*,o_2^*,\ldots,o_k^*$ be the $k$NNs with respect to $q$. The approximated $k$NNs are $o_1,o_2,\ldots,o_k$. The approximate error ratio is computed as
@@ -131,8 +131,7 @@ So a small ratio implies high query accuracy. An average of the error ratios fro
 
 \Paragraph{Parameters Setting} The original LSH indices for these datasets are first built with parameters $l=3,m=3$ (The effect of different $l$ and $m$ will be shown in Sec. \ref{sec:expr:param}).$w$ is set to satisfy a predefined accuracy which is different for different experiments. The number of returned NNs $k$ is set to 20 unless particularly mentioned. $r^*$ is estimated by sampling 1\% data points as discussed in Section \ref{sec:layerlsh:param}, which differs with respect to $k$ and dataset. The LayerLSH parameters are set as $\alpha=0.9, \beta=0.005$ unless particularly mentioned. And none of these two parameters are primarily chosen, so that the algorithm will perform query processing by ``averaging'' these two requirements as discussed in Section \ref{sec:layerlsh:query}.
 
-\vspace{-0.1in}
-\subsection{Overal Performance}
+\subsection{Overall Performance}
 \label{sec:expr:overall}
 
 We compare the LSH variants and their layered versions when answering $k$NN query ($k=20$). Generally speaking, more query cost will result in high accuracy and vice versa. It does not make too much sense if comparing query cost or query accuracy independently, so we will show the query cost result and accuracy result in the same figure. We are trying to answer the question, which method results in the highest accuracy with the same query cost, or which method requires the lowest cost to achieve the same accuracy. We first build multiple LSH indices for these datasets by using different accuracy requirement parameters. By using different LSH indices, we expect to obtain various (cost, accuracy) pairs when answering $k$NN queries, which correspond to the multiple points in an (x, y)-plot. We then reconstruct the LSH indices and build their layered versions. By tuning the expected recall $\alpha$ and expected precision $\beta$, we can also create multiple layered indices with various (query cost, query accuracy) pairs.
@@ -146,7 +145,6 @@ We compare the LSH variants and their layered versions when answering $k$NN quer
 
 \Paragraph{DSH vs. LayerDSH} In DSH, we sample 0.5\% of the data to learn the data-sensitive hash family. In addition, $p_1=0.9$ and $p_2=0.1$. We rebuild DSH hash tables by rehashing dense buckets and merging sparse buckets. We tune $l,m$ in DSH and $\alpha,\beta$ in LayerLSH so as to obtain various (query cost) result pairs. Figure \ref{fig:dshresult} shows the query accuracy with various query cost for different types of queries. We can see that, with respect to a specific type of queries, LayerDSH always outperforms DSH. In addition, DSH and LayerDSH exhibit better accuracy for sparse queries than dense queries, which is different from LSH and LayerLSH.
 
-\vspace{-0.1in}
 \subsection{Space Consumption}
 
 The space consumption is the size of the index file which is used to store the index. The space consumption of the basic LSH index and the LayerLSH index are listed in Table \ref{tab:space_lsh}, where $l=3, m=3, \alpha=0.9$ for both LSH and LayerLSH. Since the dense buckets are rehashed in extra hash tables and more copies of dense buckets exist, LayerLSH needs more space to store the extra indices.
@@ -158,7 +156,7 @@ The space consumption is the size of the index file which is used to store the i
     %\vspace{-0.1in}
     \label{tab:space_lsh}
     \centering
-    \small
+    %\small
     \begin{tabular}{c|c|c|c|c}
     \hline
  \multirow{2}{*}{\tabincell{c}{Dataset}} & \multirow{2}{*}{\tabincell{c}{Basic \\ LSH}} & \multicolumn{3}{|c}{LayerLSH}  \\
@@ -181,7 +179,6 @@ Mnist & 185MB & 189MB & 196MB & 227MB\\
 
 In LayerLSH, the space consumption highly depends on the expected precision parameter $\beta$, which indicates the threshold for overloaded bucket. The bigger the $\beta$ is, the smaller bucket is preferred. Thus, a larger number of small buckets and more child hash tables are expected to be created, so that more space for indexing these buckets and hash tables are required. As shown in Table \ref{tab:space_lsh}, the index size is not increased too much which is acceptable. As will be seen later in Section \ref{sec:expr:param}, we can achieve good enough accuracy and efficiency when setting $\beta=0.5\%$
 
-\vspace{-0.1in}
 \subsection{Rebuilding Time}
 
 Rebuilding LSH indices is not free. We need extra time for building LayerLSH index. We measure the rebuilding time for LayerLSH in this experiment. The amount of rebuilding effort is highly related to the parameter $\beta$, which indicates the threshold for overloaded bucket. A smaller $\beta$ implies that higher query cost is tolerable, so that it is possible that only a small number of highly overloaded buckets are rehashed. In contrast, a bigger $\beta$ implies that a large number of buckets are probably recognized as overloaded buckets and great efforts can be put on rehashing. Accordingly, the rebuilding time increases as $\beta$ is increased.
@@ -192,7 +189,7 @@ Rebuilding LSH indices is not free. We need extra time for building LayerLSH ind
     %\vspace{-0.1in}
     \label{tab:rebuildtime}
     \centering
-    \small
+    %\small
     \begin{tabular}{c|c|c|c|c}
     \hline
  \multirow{2}{*}{\tabincell{c}{Dataset}} & \multirow{2}{*}{\tabincell{c}{Basic \\ LSH}} & \multicolumn{3}{|c}{LayerLSH}  \\
@@ -215,7 +212,6 @@ Mnist & 2.2s & 3.3s & 6.62s & 25.2s\\
 
 We show the rebuilding time when $\beta=0.1\%,0.2\%,0.5\%$ in Table \ref{tab:rebuildtime}. The LSH building time includes the data loading time and the index building time. The LayerLSH rebuilding time includes the LSH index loading time and the index rebuilding time. As can be seen, comparing to the original LSH indexing time, LayerLSH needs reasonable more time for rebuilding index for most datasets when $\beta$ is small. It is expected to require longer rebuilding time when $\beta$ is bigger. But as shown in the next experiment, by setting $\beta=0.5\%$ the accuracy and efficiency can be both good enough.
 
-\vspace{-0.15in}
 \subsection{Parameter Studies}
 \label{sec:expr:param}
 
@@ -242,7 +238,7 @@ In this study, we investigate the parameters that potentially affect the perform
     %\vspace{-0.1in}
 	\caption{Effect of parameters in LayerLSH (KDD)}
 	\label{fig:param}
-%\vspace{-0.15in}
+\vspace{-0.15in}
 \end{figure*}
 
 We first study the effect of $k$ by varying $k$ from 5 to 100 and fixing $\alpha=0.9, \beta=0.005$. Figure \ref{fig:effect:k} shows the results. In general, the error ratio drops slightly when $k$ increases, and the query cost increases when $k$ increases. This is under expectation since we fix the expected precision $\beta=0.005$ and the query cost will increase as $k$ increases.
@@ -257,7 +253,7 @@ We also study the effect of $\beta$ by varying $\beta$ from 0.0001 to 0.1 and fi
     %\vspace{-0.1in}
     \label{tab:lm}
     \centering
-    \small
+    %\small
     \begin{tabular}{c|c|c|c|c|c|c|c}
     \hline
   \multicolumn{2}{c}{} & \multicolumn{2}{|c}{$m=5$} & \multicolumn{2}{|c}{$m=6$} & \multicolumn{2}{|c}{$m=8$} \\
@@ -304,7 +300,7 @@ To illustrate LayerLSH's ability for handling stream data, we prepare a sequence
 
 The processing throughput and query cost results are shown in Figure \ref{fig:streaminsert}. We can see that the processing throughput is obviously reduced after each time window (0.5s and 1s) since many overloaded buckets will be split at that time. Note that, the throughput may also drop within a time window since some buckets might be seriously overloaded (i.e., the bucket size is larger than $(1+\epsilon_m)\cdot T_u$) and cannot wait for the time window to end. The query cost for a specific point will be continuously increased until some of its host buckets are split. From this figure, this happens after the first time window (0.5s). It is probably because one of the query's host buckets is split. In addition, the throughput should be affected by $\epsilon_m$ and $\epsilon_c$. We run experiments and see that the throughput is increased when increasing $\epsilon_m$. For $\epsilon_m=(0.2,0.4,0.6,0.8,1)$, the average throughput results is $(1.25,1.49,1.66,1.77,2.28)\times 10^5$ pts/s.
 
-\begin{comment}
+
 \subsection{Distributed All-Pairs Computation}
 \label{sec:expr:allpair}
 
@@ -339,6 +335,6 @@ By applying LSH and LayerLSH, the bucket size distributions are depicted in Figu
 \end{figure}
 
 The runtime of reduce tasks are shown in Figure \ref{fig:amazon}. Each color bar represents a reduce task, which performs local all-pairs computation. Each worker is assigned with multiple reduce tasks. The skewed distribution of bucket sizes leads to the skewed runtime of reduce tasks. We can see that the runtime of reduce tasks is seriously skewed when using LSH. While the runtime of reduce tasks in LayerLSH is more balanced. Accordingly, LSH-based point density evaluation requires much longer runtime than LayerLSH-based approach (20h58m2s vs. 1h36m38s). Since the rehashing strategy of LayerLSH does not reduce accuracy and the sparse buckets are merged, the accuracy is even higher by using LayerLSH\footnote{Because we cannot obtain the exact density values of all points in a reasonable time, we only show the sum of density values. In terms of point density's definition, the larger density should be more accurate.}.
-\end{comment}
+
 
 
